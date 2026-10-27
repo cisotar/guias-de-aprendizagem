@@ -289,7 +289,7 @@ export function App() {
           type="button"
           aria-pressed={view === v}
           onClick={() => setView(v)}
-          className={cn("min-h-10 rounded-lg border px-4 text-sm font-bold", view === v ? "border-ring bg-secondary" : "border-border bg-card hover:bg-muted")}
+          className={cn("lift min-h-10 rounded-lg border px-4 text-sm font-bold", view === v ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted")}
         >
           {label}
         </button>
@@ -391,7 +391,7 @@ export function App() {
               aria-current={(id === "materias" ? section !== "guias" : section === "guias") ? "page" : undefined}
               onClick={() => setSection(id)}
               className={cn(
-                "min-h-10 rounded-lg border px-5 font-bold",
+                "lift min-h-10 rounded-lg border px-5 font-bold",
                 (id === "materias" ? section !== "guias" : section === "guias") ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted",
               )}
             >

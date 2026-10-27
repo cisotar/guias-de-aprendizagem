@@ -43,7 +43,7 @@ export function ModeToggle({ mode, onMode }: { mode: ViewMode; onMode: (m: ViewM
           type="button"
           aria-pressed={mode === m}
           onClick={() => onMode(m)}
-          className={cn("min-h-10 rounded-lg border px-4 font-bold", mode === m ? "border-ring bg-secondary" : "border-border bg-card hover:bg-muted")}
+          className={cn("lift min-h-10 rounded-lg border px-4 font-bold", mode === m ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted")}
         >
           {label}
         </button>
@@ -169,7 +169,7 @@ export function TermStrip({ target, activeTerm, onTerm, onUpload }: { target: Gu
         const status = guideStatus(documents, reports, target, n);
         const open = n === activeTerm;
         return (
-          <div key={n} className={cn("flex flex-col gap-1.5 rounded-xl border bg-card p-3", open ? "border-2 border-primary p-[11px]" : "border-border")}>
+          <div key={n} className={cn("lift flex flex-col gap-1.5 rounded-xl border bg-card p-3", open ? "border-2 border-primary bg-primary/10 p-[11px] shadow-md ring-2 ring-primary/30" : "border-border")}>
             <p className="font-bold">{n}º bimestre</p>
             <StatusPill status={status} />
             <p className="text-[13px] leading-[18px] text-muted-foreground">{dates(n)}</p>

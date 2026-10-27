@@ -144,6 +144,19 @@
   outline-offset: 2px;
 }
 
+/* Pílulas e cartões "crescem" um pouco ao passar o mouse, vindo para o primeiro plano. */
+@media (prefers-reduced-motion: no-preference) {
+  .lift {
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+  }
+  .lift:hover:not(:disabled) {
+    transform: scale(1.04);
+    box-shadow: 0 6px 16px -4px rgb(0 0 0 / 0.2);
+    position: relative;
+    z-index: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
