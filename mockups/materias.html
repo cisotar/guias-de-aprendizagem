@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup: matérias, séries e guias</title>
+<style>
+  :root {
+    --ink: #17202a; --muted: #505a66; --line: #d9dee5; --bg: #f4f6f8; --card: #fff;
+    --accent: #0b5c63; --accent-soft: #e1f0f1; --warn-bg: #fdf0dc; --warn: #7a4300;
+    --ok-bg: #dff1e4; --ok: #1d5a2f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--bg); line-height: 1.4; }
+  button, input, select { font: inherit; color: inherit; }
+  .btn { min-height: 40px; padding: 0 14px; border: 1px solid #b9c1cb; border-radius: 8px; background: #fff; font-weight: 500; cursor: pointer; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  .btn:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #5aa9b0; outline-offset: 2px; }
+  .inp { height: 40px; padding: 0 10px; border: 1px solid #b9c1cb; border-radius: 8px; background: #fff; width: 100%; }
+  .sm { font-size: 13px; color: var(--muted); margin: 0; }
+  h1 { font-size: 26px; margin: 0; line-height: 1.25; }
+  h2 { font-size: 18px; margin: 0; }
+  h3 { font-size: 15px; margin: 0; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 99px; }
+  .ok { background: var(--ok-bg); color: var(--ok); }
+  .ed { background: var(--accent-soft); color: var(--accent); }
+  .no { background: var(--warn-bg); color: var(--warn); }
+
+  /* Barra de escolha do mockup (não faz parte do app) */
+  .picker { background: #17202a; color: #fff; padding: 10px 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .picker strong { margin-right: 8px; font-size: 13px; }
+  .picker button { background: transparent; border: 1px solid #5b6572; color: #fff; border-radius: 8px; min-height: 36px; padding: 0 12px; cursor: pointer; }
+  .picker button[aria-pressed="true"] { background: #fff; color: #17202a; font-weight: 700; }
+
+  /* App */
+  .app { display: flex; min-height: calc(100vh - 56px); }
+  aside { width: 300px; flex: none; background: #eef1f4; border-right: 1px solid var(--line); padding: 20px; display: flex; flex-direction: column; gap: 0; }
+  aside .blk { border-top: 1px solid var(--line); padding: 16px 0; display: flex; flex-direction: column; gap: 8px; }
+  aside .blk:first-of-type { border-top: 0; padding-top: 0; }
+  .terms { display: grid; grid-template-columns: 24px 1fr 1fr; gap: 6px; align-items: center; font-size: 13px; font-weight: 700; }
+  .terms .inp { height: 36px; font-size: 12px; padding: 0 6px; }
+  aside .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  main { flex: 1; min-width: 0; padding: 0 32px 32px; }
+  .topnav { display: flex; gap: 4px; padding: 12px 0; margin: 0 0 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .topnav button { min-height: 40px; padding: 0 18px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font-weight: 700; cursor: pointer; }
+  .topnav button[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .crumbs a { color: var(--accent); font-weight: 700; cursor: pointer; text-decoration: underline; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 12px; }
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .subject { display: flex; flex-direction: column; gap: 12px; }
+  .subject-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .serieLink { flex: 1 1 240px; max-width: 360px; border: 1px solid var(--line); border-radius: 12px; padding: 14px; text-align: left; background: #fff; cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
+  .serieLink:hover { border-color: var(--accent); }
+  .serieLink b { font-size: 16px; color: var(--accent); text-decoration: underline; }
+  .serieLink.off { border-style: dashed; background: transparent; }
+  .serieLink.off b { color: var(--muted); text-decoration: none; }
+  .days { display: grid; grid-template-columns: repeat(5, 44px); gap: 4px; }
+  .days label { font-size: 11px; color: var(--muted); text-align: center; display: block; }
+  .days input { width: 44px; height: 40px; text-align: center; border: 1px solid #b9c1cb; border-radius: 6px; }
+  .turma { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 12px 0; border-top: 1px solid var(--line); }
+  .turma:first-child { border-top: 0; }
+  .chip { width: 38px; height: 38px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 700; display: grid; place-items: center; }
+  .dropzone { border: 2px dashed #8b95a1; border-radius: 10px; padding: 18px; text-align: center; color: var(--muted); background: #fafbfc; }
+  .guide { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .guide .band { background: var(--accent); color: #fff; padding: 10px 20px; font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th { text-align: left; background: #eef1f4; padding: 8px 10px; border: 1px solid #cfd5dc; }
+  td { padding: 8px 10px; border: 1px solid #cfd5dc; vertical-align: top; }
+  .docbox { border: 1px solid #000; }
+  .docrow { padding: 8px 10px; font-size: 13px; border-top: 1px solid #000; }
+  .docbox > .docrow:first-child { border-top: 0; }
+  .docrow.center { text-align: center; }
+  .docrow.ids { display: flex; flex-wrap: wrap; gap: 6px 24px; }
+  .docrow.ev { display: flex; justify-content: space-between; }
+  .docbar { height: 18px; background: #cfe3e5; }
+  .dochead { background: #e6ecef; text-align: center; padding: 6px; border-bottom: 1px solid #000; font-size: 13px; }
+  .docgrid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .docgrid3 { display: grid; grid-template-columns: 1fr 1fr 2fr; }
+  .docgrid2 > .docbox + .docbox { border-left: 0; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tabs button { min-height: 40px; padding: 0 16px; border: 1px solid #b9c1cb; border-radius: 99px; background: #fff; font-weight: 700; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .note { background: #fffbe6; border: 1px dashed #c9a800; padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+  [hidden] { display: none !important; }
+  @media (max-width: 800px) { .app { flex-direction: column; } aside { width: 100%; } main { padding: 0 16px 24px; } }
+</style>
+</head>
+<body>
+
+<div class="picker" role="group" aria-label="Escolher a tela do mockup">
+  <strong>Mockup (não faz parte do app):</strong>
+  <button type="button" data-go="materias" aria-pressed="true">1 · Minhas matérias</button>
+  <button type="button" data-go="serie" aria-pressed="false">2 · Matemática · 3ª série</button>
+  <button type="button" data-go="guia" aria-pressed="false">3 · Ver guia</button>
+  <button type="button" data-go="bimestre" aria-pressed="false">4 · Guias por bimestre</button>
+</div>
+
+<div class="app">
+  <aside aria-label="Configurações">
+    <div class="blk">
+      <h2>Professor(a)</h2>
+      <input class="inp" value="Maria Souza" aria-label="Nome do professor">
+    </div>
+    <div class="blk">
+      <h2>Bimestres</h2>
+      <p class="sm">Calendário da escola: as datas valem para todas as matérias, séries e turmas.</p>
+      <div class="terms">
+        <span>1º</span><input class="inp" value="03/02/2026" aria-label="Início do 1º bimestre"><input class="inp" value="11/04/2026" aria-label="Fim do 1º bimestre">
+        <span>2º</span><input class="inp" value="14/04/2026" aria-label="Início do 2º bimestre"><input class="inp" value="04/07/2026" aria-label="Fim do 2º bimestre">
+        <span>3º</span><input class="inp" value="21/07/2026" aria-label="Início do 3º bimestre"><input class="inp" value="26/09/2026" aria-label="Fim do 3º bimestre">
+        <span>4º</span><input class="inp" value="29/09/2026" aria-label="Início do 4º bimestre"><input class="inp" value="19/12/2026" aria-label="Fim do 4º bimestre">
+      </div>
+    </div>
+    <div class="blk">
+      <div class="row"><h2>Feriados</h2><span class="sm">SP · São Paulo ▸</span></div>
+    </div>
+    <div class="blk">
+      <div class="row"><h2>Colunas e saída</h2><span class="sm">▸</span></div>
+      <p class="sm">Colunas, exportar e importar dados.</p>
+    </div>
+    <p class="note">A sidebar fica só com o que vale para tudo, inclusive as datas dos bimestres. Matérias, turmas e PDF saíram daqui.</p>
+  </aside>
+
+  <main>
+    <nav class="topnav" aria-label="Seções">
+      <button type="button" data-go="materias" id="nav-materias" aria-current="page">Minhas matérias</button>
+      <button type="button" data-go="guia" id="nav-guias">Guias</button>
+    </nav>
+
+    <!-- 1 · Minhas matérias -->
+    <section id="materias" class="stack">
+      <div>
+        <h1>Minhas matérias</h1>
+        <p class="sm">Cadastre a matéria e marque as séries em que você leciona. Cada série tem a sua página, para turmas, aulas por semana e PDF.</p>
+      </div>
+
+      <div class="card subject">
+        <div class="subject-head"><h2>Matemática</h2><button class="btn" type="button">Remover matéria</button></div>
+        <div class="wrap">
+          <button class="serieLink" type="button" data-go="serie">
+            <b>1ª série ›</b><span class="sm">Turmas A, B · 6 aulas por semana</span><span><span class="pill ok">3 bimestres com PDF</span></span>
+          </button>
+          <button class="serieLink" type="button" data-go="serie">
+            <b>2ª série ›</b><span class="sm">Turma A · 3 aulas por semana</span><span><span class="pill no">Falta o PDF</span></span>
+          </button>
+          <button class="serieLink" type="button" data-go="serie">
+            <b>3ª série ›</b><span class="sm">Turmas A, B, C · 9 aulas por semana</span><span><span class="pill ed">2 bimestres com PDF</span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card subject">
+        <div class="subject-head"><h2>Geografia</h2><button class="btn" type="button">Remover matéria</button></div>
+        <div class="wrap">
+          <button class="serieLink" type="button" data-go="serie">
+            <b>1ª série ›</b><span class="sm">Sem turmas · 3 aulas por semana</span><span><span class="pill ok">4 bimestres com PDF</span></span>
+          </button>
+          <div class="serieLink off"><b>2ª série</b><span class="sm">Não leciono</span><button class="btn" type="button">Passar a lecionar</button></div>
+          <div class="serieLink off"><b>3ª série</b><span class="sm">Não leciono</span><button class="btn" type="button">Passar a lecionar</button></div>
+        </div>
+      </div>
+
+      <form class="card" onsubmit="return false" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div style="flex:1 1 240px">
+          <label for="nova" style="font-weight:700;font-size:14px">Nova matéria</label>
+          <input id="nova" class="inp" placeholder="Ex.: Sociologia">
+        </div>
+        <fieldset style="border:0;padding:0;margin:0;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <legend class="sm" style="padding:0 0 4px">Séries em que leciono</legend>
+          <label><input type="checkbox" checked> 1ª série</label>
+          <label><input type="checkbox"> 2ª série</label>
+          <label><input type="checkbox"> 3ª série</label>
+        </fieldset>
+        <button class="btn primary" type="submit">Adicionar matéria</button>
+      </form>
+    </section>
+
+    <!-- 2 · Página da série -->
+    <section id="serie" class="stack" hidden>
+      <div>
+        <p class="crumbs"><a data-go="materias" role="link" tabindex="0">Minhas matérias</a> › Matemática › 3ª série</p>
+        <h1>Matemática · 3ª série</h1>
+      </div>
+
+      <div class="card">
+        <h2>1. Turmas e aulas por semana</h2>
+        <p class="sm" style="margin:4px 0 8px">Cada turma tem o seu horário. Se não separa turmas, deixe só uma linha sem nome.</p>
+        <div class="turma">
+          <span class="chip">A</span>
+          <div class="days"><label>Seg<input value="2"></label><label>Ter<input value="0"></label><label>Qua<input value="1"></label><label>Qui<input value="0"></label><label>Sex<input value="0"></label></div>
+          <span class="sm">3 aulas por semana</span><button class="btn" type="button">Remover</button>
+        </div>
+        <div class="turma">
+          <span class="chip">B</span>
+          <div class="days"><label>Seg<input value="0"></label><label>Ter<input value="2"></label><label>Qua<input value="0"></label><label>Qui<input value="1"></label><label>Sex<input value="0"></label></div>
+          <span class="sm">3 aulas por semana</span><button class="btn" type="button">Remover</button>
+        </div>
+        <div class="turma">
+          <span class="chip">C</span>
+          <div class="days"><label>Seg<input value="1"></label><label>Ter<input value="0"></label><label>Qua<input value="0"></label><label>Qui<input value="0"></label><label>Sex<input value="2"></label></div>
+          <span class="sm">3 aulas por semana</span><button class="btn" type="button">Remover</button>
+        </div>
+        <div class="turma"><input class="inp" style="max-width:200px" placeholder="Nova turma, ex.: D" aria-label="Nova turma"><button class="btn" type="button">+ Adicionar turma</button></div>
+      </div>
+
+      <div class="card">
+        <h2>2. PDF do Escopo-Sequência</h2>
+        <p class="sm" style="margin:4px 0 10px">O PDF traz a tabela de aulas (conteúdo, objetivos, habilidades). Ele vale para todas as turmas: depois de enviar, cada turma recebe a sua cópia da tabela, e o app monta a guia de aprendizagem completa em volta dela.</p>
+        <div class="dropzone">Arraste o PDF aqui ou <button class="btn primary" type="button">Enviar PDF</button></div>
+        <p class="sm" style="margin-top:8px">PDFs já enviados: <b>guia-mat-3s-b1.pdf</b> (1º bim.), <b>guia-mat-3s-b2.pdf</b> (2º bim.)</p>
+      </div>
+
+      <div class="card">
+        <h2>3. Guia de aprendizagem</h2>
+        <p class="sm" style="margin:4px 0 0">Documento completo: identificação, justificativa, objetivos, datas, cronograma, estratégias, critérios e referências. As datas de cada bimestre são as do calendário da escola (barra lateral).</p>
+        <div class="grid4" style="margin-top:10px">
+          <div class="card"><h3>1º bimestre</h3><p><span class="pill ok">Guia pronta</span></p><p class="sm">03/02 a 11/04 · calendário da escola</p><button class="btn primary" type="button" data-go="guia">Ver guia</button></div>
+          <div class="card"><h3>2º bimestre</h3><p><span class="pill ed">Editada</span></p><p class="sm">14/04 a 04/07 · calendário da escola</p><button class="btn primary" type="button" data-go="guia">Ver guia</button></div>
+          <div class="card"><h3>3º bimestre</h3><p><span class="pill no">Falta o PDF</span></p><p class="sm">21/07 a 26/09 · calendário da escola</p><button class="btn" type="button" disabled>Ver guia</button></div>
+          <div class="card"><h3>4º bimestre</h3><p><span class="pill no">Falta o PDF</span></p><p class="sm">29/09 a 19/12 · calendário da escola</p><button class="btn" type="button" disabled>Ver guia</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>4. Copiar a guia entre as turmas</h2>
+        <p class="sm" style="margin:4px 0 10px">Leva a guia inteira: tabela de aulas, ordem, linhas livres e todo o texto do documento. Depois cada turma se edita à parte.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end">
+          <div><label for="origem" style="font-weight:700;font-size:14px">Copiar da</label><br>
+            <select id="origem" class="inp" style="width:160px"><option>Turma A</option><option>Turma B</option><option>Turma C</option></select></div>
+          <fieldset style="border:0;padding:0;margin:0;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+            <legend class="sm" style="padding:0 0 4px">Para</legend>
+            <label><input type="checkbox" checked> Turma B</label>
+            <label><input type="checkbox" checked> Turma C</label>
+          </fieldset>
+          <fieldset style="border:0;padding:0;margin:0;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+            <legend class="sm" style="padding:0 0 4px">Bimestres</legend>
+            <label><input type="checkbox" checked> 1º</label>
+            <label><input type="checkbox" checked> 2º</label>
+          </fieldset>
+          <button class="btn primary" type="button">Copiar</button>
+        </div>
+        <p class="note" style="margin-top:12px">Turma B já tem guia no 2º bimestre. Copiar substitui o que está lá.</p>
+      </div>
+    </section>
+
+    <!-- 3 · Ver guia -->
+    <section id="guia" class="stack" hidden>
+      <div>
+        <p class="crumbs"><a data-go="materias" role="link" tabindex="0">Minhas matérias</a> › <a data-go="serie" role="link" tabindex="0">Matemática · 3ª série</a> › Guia</p>
+        <div style="display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;align-items:end">
+          <h1>Guia de aprendizagem · Matemática · 3ª série A · 2º bimestre</h1>
+          <div class="wrap"><button class="btn" type="button" data-go="serie">Copiar para outra turma…</button><button class="btn primary" type="button">Imprimir esta guia</button></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+        <div class="tabs" role="tablist" aria-label="Turmas"><button role="tab" aria-selected="true" type="button">3ª série A</button><button role="tab" aria-selected="false" type="button">3ª série B</button><button role="tab" aria-selected="false" type="button">3ª série C</button></div>
+        <div class="tabs" role="tablist" aria-label="Bimestres"><button role="tab" aria-selected="false" type="button">1º bim.</button><button role="tab" aria-selected="true" type="button">2º bim.</button></div>
+      </div>
+      <article class="guide" aria-label="Guia de aprendizagem · Matemática · 3ª série A · 2º bimestre">
+        <div class="band">FAIXA DO TOPO (imagem da escola, repetida em cada página)</div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+          <h2 style="text-align:center;letter-spacing:.04em">GUIA DE APRENDIZAGEM – PEI</h2>
+
+          <section class="docbox" aria-label="Identificação">
+            <div class="docrow center"><b>E. E. Exemplo</b></div>
+            <div class="docrow ids"><span><b>Professor(a):</b> Maria Souza</span><span><b>Componente:</b> Matemática</span><span><b>Série:</b> 3ª série A</span><span><b>2º Bimestre/2026</b></span></div>
+            <div class="docrow"><b>Justificativa:</b> texto editável da turma…</div>
+            <div class="docrow"><b>Objetivos:</b> texto editável da turma…</div>
+          </section>
+
+          <section class="docbox" aria-label="Datas e eventos">
+            <div class="docbar"></div>
+            <div class="docrow ev"><span>Avaliação bimestral</span><span>10/06 a 25/06</span></div>
+            <div class="docrow ev"><span>Feira de matemática</span><span>26/04</span></div>
+          </section>
+
+          <section aria-label="Cronograma">
+            <p class="sm" style="margin-bottom:6px"><b>Cronograma</b> (a tabela do PDF, com as semanas do bimestre 14/04 a 04/07)</p>
+            <table>
+              <thead><tr><th style="width:120px">Semana</th><th style="width:60px">Aula</th><th>Conteúdo</th><th>Habilidades</th></tr></thead>
+              <tbody>
+                <tr><td>14/04 – 18/04</td><td>1</td><td>Funções exponenciais</td><td>EM13MAT304</td></tr>
+                <tr><td>21/04 – 25/04</td><td>2 e 3</td><td>Logaritmos: definição e propriedades</td><td>EM13MAT305</td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <div class="docgrid2">
+            <section class="docbox"><h3 class="dochead">Competências socioemocionais</h3><div class="docrow">Lista editável…</div></section>
+            <section class="docbox"><h3 class="dochead">Temas transversais</h3><div class="docrow">Lista editável…</div></section>
+          </div>
+          <section class="docbox"><h3 class="dochead">Estratégias didáticas</h3>
+            <div class="docgrid3"><div class="docrow"><b>Autodidáticas</b><br>…</div><div class="docrow"><b>Didático-cooperativas</b><br>…</div><div class="docrow"><b>Complementares</b><br>…</div></div>
+          </section>
+          <div class="docgrid2">
+            <section class="docbox"><h3 class="dochead">Princípios e premissas</h3><div class="docrow">Lista editável…</div></section>
+            <section class="docbox"><h3 class="dochead">Critérios de avaliação</h3><div class="docrow">Lista editável…</div></section>
+          </div>
+          <section class="docbox"><h3 class="dochead">Referências</h3><div class="docrow"><b>Para o(a) professor(a):</b> …<br><b>Para o(a) estudante:</b> …</div></section>
+          <p class="note">A guia é o documento inteiro, como no modelo da escola. A tabela extraída do PDF é só a parte "Cronograma". Todo o texto se edita ao clicar, e cada turma tem o seu.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- 4 · Guias por bimestre -->
+    <section id="bimestre" class="stack" hidden>
+      <div>
+        <h1>2º bimestre · todas as guias</h1>
+        <p class="sm">6 turmas em 2 matérias · 5 com guia · 1 sem guia</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Bimestres"><button role="tab" aria-selected="false" type="button">1º bim.</button><button role="tab" aria-selected="true" type="button">2º bim.</button><button role="tab" aria-selected="false" type="button">3º bim.</button><button role="tab" aria-selected="false" type="button">4º bim.</button></div>
+      <div class="card subject">
+        <h2>Matemática</h2>
+        <h3 class="sm">1ª série</h3>
+        <div class="wrap">
+          <div class="card" style="flex:1 1 220px;max-width:300px"><b>1ª série A</b><p><span class="pill ok">Guia pronta</span></p><button class="btn primary" type="button" data-go="guia">Ver guia</button></div>
+          <div class="card" style="flex:1 1 220px;max-width:300px"><b>1ª série B</b><p><span class="pill ok">Guia pronta</span></p><button class="btn primary" type="button" data-go="guia">Ver guia</button></div>
+        </div>
+        <h3 class="sm">3ª série</h3>
+        <div class="wrap">
+          <div class="card" style="flex:1 1 220px;max-width:300px"><b>3ª série A</b><p><span class="pill ed">Editada</span></p><button class="btn primary" type="button" data-go="guia">Ver guia</button></div>
+          <div class="card" style="flex:1 1 220px;max-width:300px"><b>3ª série B</b><p><span class="pill ok">Guia pronta</span></p><button class="btn primary" type="button" data-go="guia">Ver guia</button></div>
+          <div class="card" style="flex:1 1 220px;max-width:300px;border-style:dashed;background:#fffaf1"><b>3ª série C</b><p><span class="pill no">Sem guia</span></p><button class="btn" type="button" data-go="serie">Copiar da turma A…</button></div>
+        </div>
+      </div>
+      <div><button class="btn primary" type="button">Ver e imprimir todas (5 guias)</button></div>
+    </section>
+  </main>
+</div>
+
+<script>
+  var screens = ["materias", "serie", "guia", "bimestre"];
+  function go(name) {
+    screens.forEach(function (s) { document.getElementById(s).hidden = s !== name; });
+    document.querySelectorAll(".picker [data-go]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.go === name)); });
+    // "Guias" no menu do topo cobre as telas 3 e 4; "Minhas matérias" cobre 1 e 2.
+    var inGuides = name === "guia" || name === "bimestre";
+    document.getElementById("nav-materias").setAttribute("aria-current", inGuides ? "false" : "page");
+    document.getElementById("nav-guias").setAttribute("aria-current", inGuides ? "page" : "false");
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-go]");
+    if (t) go(t.dataset.go);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.matches("[role=link][data-go]")) go(e.target.dataset.go);
+  });
+</script>
+</body>
+</html>
