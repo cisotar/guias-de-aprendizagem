@@ -26,8 +26,8 @@ Definidas como variáveis CSS e expostas no Tailwind (tema do shadcn/ui com este
 | `--primary-foreground` | `#FFFFFF` | texto sobre `--primary` |
 | `--line` | `#F3B8C8` | bordas da tabela (rosa do guia) |
 | `--week` | `#1F5F7A` | faixa e texto da coluna Cronograma (azul-petróleo) |
-| `--week-soft` | `#E3EEF2` | fundo das semanas alternadas |
-| `--project` | `#E9D5F5` | aulas de projeto (lilás do guia) |
+| `--week-soft` | `#E3EEF2` | só na prévia do arrasto (sem uso nas semanas) |
+| `--project` | `#E9D5F5` | sem uso na tabela (aulas de projeto só têm o selo "Projeto") |
 | `--report-head` | `#F8E7BB` | títulos das caixas do relatório (bege do guia da escola) |
 | `--report-bar` | `#DDD9C3` | barra acima da tabela de datas do relatório |
 | `--focus` | `#1F5F7A` | anel de foco (2 px + 2 px de afastamento) |
@@ -85,7 +85,7 @@ Base: **shadcn/ui** (Sidebar, Button, Input, Checkbox, Calendar/Popover, Dialog,
 | Componente | Função | Observações |
 | --- | --- | --- |
 | `ScheduleTable` | tabela principal | `@tanstack/react-table`; cabeçalho `--primary`; bordas `--line` |
-| `WeekCell` | célula Cronograma | `rowSpan` com as aulas da semana; texto `--week`, fundo alternando `--surface` e `--week-soft`; mostra "05/10 a 09/10" |
+| `WeekCell` | célula Cronograma | `rowSpan` com as aulas da semana; texto `--week`, fundo uniforme (`--surface`, como as demais células; a semana se separa pela linha grossa); mostra "05/10 a 09/10" |
 | `SortableRow` | linha arrastável | alça `GripVertical` (lucide); arrasta por mouse, toque e teclado |
 | `ColumnPicker` | colunas visíveis e ordem | lista com checkbox e alça |
 | `TeachingDaysField` | segunda a sexta | cinco checkboxes numa linha, rótulos "Seg" a "Sex" |

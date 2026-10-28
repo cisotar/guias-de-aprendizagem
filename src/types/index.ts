@@ -172,6 +172,8 @@ export const COLUMN_IDS = [
   "objectives",
   "skills",
   "essentialLearning",
+  "taught",
+  "taughtDate",
 ] as const;
 export const columnIdSchema = z.enum(COLUMN_IDS);
 export type ColumnId = z.infer<typeof columnIdSchema>;
@@ -183,7 +185,12 @@ export const COLUMN_LABELS: Record<ColumnId, string> = {
   objectives: "Objetivos de aprendizagem",
   skills: "Habilidades",
   essentialLearning: "Aprendizagem Essencial",
+  taught: "AD",
+  taughtDate: "AD data",
 };
+
+/** Texto que aparece ao passar o mouse sobre o título ou a caixa da coluna. */
+export const COLUMN_HINTS: Partial<Record<ColumnId, string>> = { taught: "Aula dada", taughtDate: "Data em que a aula foi marcada como dada" };
 
 export const locationSchema = z.object({
   uf: z.string(),
@@ -222,6 +229,8 @@ export const documentObjectSchema = z.object({
   removedRows: z.record(z.string(), z.number().int().nonnegative()),
   /** Aulas do PDF que o professor removeu da tabela; ficam fora da sequência até "Restaurar". */
   deletedLessons: z.array(z.string()),
+  /** Aulas dadas: id da aula → dia em que o professor marcou (AAAA-MM-DD). Acompanha a aula, não a posição na tabela. */
+  taught: z.record(z.string(), z.string()).optional(),
 });
 
 /** Versões anteriores chamavam a sequência de `lessonOrder` e não tinham `removedRows`. */

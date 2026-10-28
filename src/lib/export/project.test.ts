@@ -17,6 +17,7 @@ const project: Project = {
       rowOrder: ["lesson-3", "lesson-1", "lesson-2"],
       removedRows: {},
       deletedLessons: [],
+      taught: { "lesson-1": "2026-10-05" },
     },
   ],
   teacher: {

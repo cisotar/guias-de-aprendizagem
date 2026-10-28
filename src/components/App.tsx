@@ -43,6 +43,7 @@ function DocumentSection({ doc, first, inReport = false }: { doc: PlanDocument; 
   const setRowFields = useProject((s) => s.setRowFields);
   const removeRow = useProject((s) => s.removeRow);
   const restoreRows = useProject((s) => s.restoreRows);
+  const setTaught = useProject((s) => s.setTaught);
   const { curriculum } = doc;
 
   const result = useMemo(
@@ -77,6 +78,8 @@ function DocumentSection({ doc, first, inReport = false }: { doc: PlanDocument; 
             rows={rows}
             columns={columns}
             display={display}
+            taught={doc.taught ?? {}}
+            onTaught={(row, value) => row.itemId && setTaught(doc.id, row.itemId, value)}
             onMove={(active, position, ids) => moveRows(doc.id, active, position, ids)}
             onClone={(row) => row.itemId && cloneRow(doc.id, row.itemId)}
             onSave={(row, field, text) => setRowFields(doc.id, { itemId: row.itemId, position: row.position }, textToField(field, text))}

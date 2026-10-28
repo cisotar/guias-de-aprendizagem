@@ -28,6 +28,14 @@ describe("linhas do cronograma", () => {
     useProject.getState().moveRows(id, "lesson-1", 2, ["lesson-1"]);
     expect(doc().rowOrder).toEqual(["lesson-2", "lesson-3", "lesson-1"]);
   });
+  it("marcar aula dada guarda a data; desmarcar apaga; a marca acompanha a aula ao arrastar", () => {
+    useProject.getState().setTaught(id, "lesson-1", true, "2026-10-05");
+    expect(doc().taught).toEqual({ "lesson-1": "2026-10-05" });
+    useProject.getState().moveRows(id, "lesson-1", 2, ["lesson-1"]);
+    expect(doc().taught).toEqual({ "lesson-1": "2026-10-05" });
+    useProject.getState().setTaught(id, "lesson-1", false);
+    expect(doc().taught).toEqual({});
+  });
   it("restaurar a posição original devolve a ordem do PDF e mantém as linhas removidas", () => {
     useProject.getState().moveRows(id, "lesson-1", 2, ["lesson-1"]);
     useProject.getState().removeRow(id, { weekId: "w1", weekRows: 3, itemId: "lesson-2" });

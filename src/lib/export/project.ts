@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { fullDate } from "@/lib/dates";
 import { buildSchedule } from "@/lib/schedule/build";
 import { sortDocuments } from "@/lib/schedule/grades";
 import { essentialLegend, skillLegend } from "@/lib/schedule/legend";
@@ -116,6 +117,8 @@ function documentMarkdown(project: Project, doc: PlanDocument): string {
           return project.display.skillsInline
             ? l.skills.map((c) => `${c} - ${BNCC_SKILLS[c] ?? "descrição não encontrada"}`).join("; ")
             : l.skills.join(", ");
+        case "taught": return doc.taught?.[l.id] ? "Sim" : "";
+        case "taughtDate": return doc.taught?.[l.id] ? fullDate(doc.taught[l.id]) : "";
         case "essentialLearning":
           return l.essentialLearning.map((a) => (project.display.essentialInline ? `${a.code} - ${a.text}` : a.code)).join(project.display.essentialInline ? "; " : ", ");
       }

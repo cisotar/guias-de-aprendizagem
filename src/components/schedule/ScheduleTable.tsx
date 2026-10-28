@@ -8,7 +8,7 @@ import {
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
 import { Copy, GripVertical, X } from "lucide-react";
-import { shortDate } from "@/lib/dates";
+import { fullDate, shortDate } from "@/lib/dates";
 import { moveBlock } from "@/lib/schedule/move";
 import { fieldToText, type TextField } from "@/lib/schedule/lessonText";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,10 +16,10 @@ import { EditableCell } from "./EditableCell";
 import type { ScheduleRow } from "@/lib/schedule/rows";
 import { cn } from "@/lib/utils";
 import { BNCC_SKILLS } from "@/lib/skills/bncc";
-import { COLUMN_IDS, COLUMN_LABELS, type ColumnId, type Display, type Lesson } from "@/types";
+import { COLUMN_HINTS, COLUMN_IDS, COLUMN_LABELS, type ColumnId, type Display, type Lesson } from "@/types";
 
 /** Larguras relativas; viram porcentagem entre as colunas visíveis (table-layout: fixed). */
-const WEIGHT: Record<ColumnId, number> = { schedule: 10, number: 13, content: 15, objectives: 24, skills: 14, essentialLearning: 24 };
+const WEIGHT: Record<ColumnId, number> = { schedule: 10, number: 13, content: 15, objectives: 24, skills: 14, essentialLearning: 24, taught: 5, taughtDate: 9 };
 
 const Items = ({ items }: { items: ReactNode[] }) =>
   items.length > 1 ? (
@@ -41,7 +41,7 @@ const Coded = ({ code, text }: { code: string; text: string }) => (
   </>
 );
 
-function lessonCell(id: Exclude<ColumnId, "schedule">, l: Lesson, display: Display) {
+function lessonCell(id: Exclude<ColumnId, "schedule" | "taught" | "taughtDate">, l: Lesson, display: Display) {
   switch (id) {
     case "number":
       return (
@@ -63,7 +63,7 @@ function lessonCell(id: Exclude<ColumnId, "schedule">, l: Lesson, display: Displ
 
 const cellClass = "border border-line px-2 py-1.5 align-top break-words print:px-1.5 print:py-1";
 
-const FIELD: Record<Exclude<ColumnId, "schedule">, TextField> = {
+const FIELD: Record<Exclude<ColumnId, "schedule" | "taught" | "taughtDate">, TextField> = {
   number: "title",
   content: "content",
   objectives: "objectives",
@@ -75,13 +75,15 @@ type RowActions = {
   onSave: (row: ScheduleRow, field: TextField, text: string) => void;
   onRemove: (row: ScheduleRow) => void;
   onClone: (row: ScheduleRow) => void;
+  /** Marcar ou desmarcar a aula da linha como dada. */
+  onTaught: (row: ScheduleRow, taught: boolean) => void;
 };
 
 /**
  * `slot` é a linha fixa da tabela (semana e posição) e dá o id do arrastar; `row` é o que ela mostra agora. Fora do arrasto
  * são iguais. Durante o arrasto `row` traz a prévia: a aula que ficaria nesse lugar se o bloco fosse solto ali.
  */
-function Row({ slot, row, columns, ghost, display, selected, onToggle, onSave, onRemove, onClone }: { slot: ScheduleRow; row: ScheduleRow; columns: ColumnId[]; ghost: boolean; display: Display; selected: boolean; onToggle: (row: ScheduleRow) => void } & RowActions) {
+function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, onSave, onRemove, onClone, onTaught }: { slot: ScheduleRow; row: ScheduleRow; columns: ColumnId[]; ghost: boolean; display: Display; selected: boolean; taught: string | undefined; onToggle: (row: ScheduleRow) => void } & RowActions) {
   const lesson = row.lesson;
   // Linhas vazias não se arrastam, mas aceitam que uma aula seja solta nelas. Usa a linha original para o arrastar não mudar no meio do gesto.
   const sortable = useSortable({
@@ -92,7 +94,6 @@ function Row({ slot, row, columns, ghost, display, selected, onToggle, onSave, o
   });
   const { setNodeRef, attributes, listeners, setActivatorNodeRef } = sortable;
   const firstOfWeek = row.weekSpan !== null;
-  const stripe = row.weekIndex % 2 === 1 ? "bg-week-soft" : "bg-card";
   // Linha vazia só sai se a semana tem outra; linha com conteúdo sempre sai (a interface confirma antes).
   const canRemove = !!lesson || row.weekRows > 1;
 
@@ -101,7 +102,7 @@ function Row({ slot, row, columns, ghost, display, selected, onToggle, onSave, o
       ref={setNodeRef}
       data-item={row.itemId ?? ""}
       className={cn(
-        lesson?.highlight === "project" ? "bg-project" : "bg-card",
+        "bg-card",
         selected && "outline-2 -outline-offset-2 outline-week",
         firstOfWeek && "border-t-2 border-t-week",
         ghost && "bg-week-soft opacity-50 outline-2 -outline-offset-2 outline-dashed outline-week",
@@ -138,8 +139,24 @@ function Row({ slot, row, columns, ghost, display, selected, onToggle, onSave, o
         if (id === "schedule") {
           if (!firstOfWeek) return null;
           return (
-            <td key={id} data-week rowSpan={row.weekSpan ?? 1} className={cn(cellClass, stripe, "align-middle font-bold text-week tabular-nums")}>
+            <td key={id} data-week rowSpan={row.weekSpan ?? 1} className={cn(cellClass, "align-middle font-bold text-week tabular-nums")}>
               {shortDate(row.week.start)} a {shortDate(row.week.end)}
+            </td>
+          );
+        }
+        if (id === "taught" || id === "taughtDate") {
+          return (
+            <td key={id} className={cn(cellClass, "bg-inherit text-center align-middle tabular-nums")}>
+              {lesson && id === "taught" && (
+                <Checkbox
+                  checked={taught !== undefined}
+                  onCheckedChange={(v) => onTaught(row, v === true)}
+                  title={COLUMN_HINTS.taught}
+                  aria-label={`Aula dada: ${lesson.custom ? `linha ${row.position + 1}` : `aula ${lesson.number}`}`}
+                  className="mx-auto"
+                />
+              )}
+              {lesson && id === "taughtDate" && taught && fullDate(taught)}
             </td>
           );
         }
@@ -185,7 +202,7 @@ function Row({ slot, row, columns, ghost, display, selected, onToggle, onSave, o
   );
 }
 
-export function ScheduleTable({ rows, columns, display, onMove, onSave, onRemove, onClone }: { rows: ScheduleRow[]; columns: ColumnId[]; display: Display; onMove: (activeId: string, overPosition: number, ids: string[]) => void } & RowActions) {
+export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, onRemove, onClone, onTaught }: { rows: ScheduleRow[]; columns: ColumnId[]; display: Display; taught: Record<string, string>; onMove: (activeId: string, overPosition: number, ids: string[]) => void } & RowActions) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
@@ -321,14 +338,14 @@ export function ScheduleTable({ rows, columns, display, onMove, onSave, onRemove
             <tr className="bg-primary text-left text-primary-foreground print:bg-primary">
               <th className="border border-line p-2 print:hidden"><span className="sr-only">Selecionar e mover</span></th>
               {visible.map((c) => (
-                <th key={c} scope="col" className="border border-line p-2 font-bold print:px-1.5 print:py-1">{COLUMN_LABELS[c]}</th>
+                <th key={c} scope="col" title={COLUMN_HINTS[c]} className="border border-line p-2 font-bold print:px-1.5 print:py-1">{COLUMN_LABELS[c]}</th>
               ))}
               <th className="border border-line p-2 print:hidden"><span className="sr-only">Clonar ou remover linha</span></th>
             </tr>
           </thead>
           <tbody ref={bodyRef}>
             <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-              {rows.map((r, i) => <Row key={r.key} slot={r} row={preview?.[i].row ?? r} ghost={preview?.[i].ghost ?? false} columns={visible} display={display} selected={selected.has(preview?.[i].row.key ?? r.key)} onToggle={toggle} onSave={onSave} onRemove={onRemove} onClone={onClone} />)}
+              {rows.map((r, i) => <Row key={r.key} slot={r} row={preview?.[i].row ?? r} ghost={preview?.[i].ghost ?? false} columns={visible} display={display} selected={selected.has(preview?.[i].row.key ?? r.key)} taught={taught[preview?.[i].row.itemId ?? r.itemId ?? ""]} onToggle={toggle} onSave={onSave} onRemove={onRemove} onClone={onClone} onTaught={onTaught} />)}
             </SortableContext>
           </tbody>
         </table>

@@ -23,6 +23,7 @@ import {
   type Term,
   type Weekday,
 } from "@/types";
+import { format } from "date-fns";
 import { mergeFetched } from "@/lib/holidays/normalize";
 import { newBlankId, normalizeRowOrder } from "@/lib/schedule/build";
 import { moveBlock } from "@/lib/schedule/move";
@@ -83,6 +84,8 @@ type Actions = {
    */
   removeRow: (documentId: string, target: { weekId: string; weekRows: number; itemId: string | null }) => void;
   restoreRows: (documentId: string) => void;
+  /** Marca ou desmarca a aula como dada. Ao marcar, guarda o dia de hoje (ou `today`, AAAA-MM-DD). */
+  setTaught: (documentId: string, lessonId: string, taught: boolean, today?: string) => void;
   /** Devolve as linhas à ordem do PDF (linhas escritas ou clonadas vão para o fim). Não mexe em linhas removidas. */
   resetRowOrder: (documentId: string) => void;
   /** Grava texto digitado numa linha. Em linha vazia, cria uma linha livre (`custom`) naquela posição. */
@@ -297,6 +300,12 @@ export const useProject = create<State>()(
             rowOrder: itemId ? normalizeRowOrder(d.rowOrder, d.curriculum.lessons, d.deletedLessons).filter((x) => x !== itemId) : d.rowOrder,
             removedRows: keepRow ? d.removedRows : { ...d.removedRows, [weekId]: (d.removedRows[weekId] ?? 0) + 1 },
           };
+        })),
+      setTaught: (documentId, lessonId, taught, today = format(new Date(), "yyyy-MM-dd")) =>
+        set((s) => updateDocument(s, documentId, (d) => {
+          const { [lessonId]: _gone, ...rest } = d.taught ?? {};
+          void _gone;
+          return { ...d, taught: taught ? { ...rest, [lessonId]: today } : rest };
         })),
       restoreRows: (documentId) => set((s) => updateDocument(s, documentId, (d) => ({ ...d, removedRows: {}, deletedLessons: [] }))),
       resetRowOrder: (documentId) => set((s) => updateDocument(s, documentId, (d) => ({ ...d, rowOrder: [] }))),
