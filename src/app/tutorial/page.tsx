@@ -20,12 +20,12 @@ export default function TutorialPage() {
           <ArrowLeft aria-hidden className="size-4" /> Voltar ao app
         </Link>
         <ol className="space-y-1 text-sm">
-          <li><a href="#salvar" className="block rounded-md px-2 py-1.5 font-bold text-primary hover:bg-muted">Guarde seus dados</a></li>
           {STEPS.map((s, i) => (
             <li key={s.id}>
               <a href={`#${s.id}`} className="block rounded-md px-2 py-1.5 hover:bg-muted">{i + 1}. {s.title}</a>
             </li>
           ))}
+          <li><a href="#salvar" className="block rounded-md px-2 py-1.5 font-bold text-primary hover:bg-muted">Guarde seus dados</a></li>
         </ol>
       </nav>
 
@@ -36,6 +36,37 @@ export default function TutorialPage() {
             Em poucos passos você transforma o Escopo - Sequência do guia em um cronograma por semanas, ajusta a ordem das aulas e imprime em A4.
           </p>
         </header>
+
+        {STEPS.map((s, i) => (
+          <section key={s.id} id={s.id} aria-labelledby={`h-${s.id}`} className="scroll-mt-8 space-y-4">
+            <h2 id={`h-${s.id}`} className="flex items-center gap-3 text-2xl leading-8 font-bold">
+              <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-base text-primary-foreground">{i + 1}</span>
+              {s.title}
+            </h2>
+            {s.body.map((p) => <p key={p} className="max-w-3xl text-base leading-7"><Rich text={p} /></p>)}
+            {s.actions && (
+              <ol className="max-w-3xl list-decimal space-y-2 pl-6 text-base leading-7 marker:font-bold marker:text-primary">
+                {s.actions.map((a) => <li key={a}><Rich text={a} /></li>)}
+              </ol>
+            )}
+            {s.tip && <p className="max-w-3xl rounded-lg border-l-4 border-ring bg-accent p-3 text-sm leading-6"><strong>Dica:</strong> {s.tip}</p>}
+            <div className="space-y-4">
+              {s.images.map((img) => (
+                <figure key={img.file}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`${basePath}/tutorial/${img.file}`} alt={img.alt} loading="lazy" className="w-full rounded-xl border border-border bg-card shadow-sm" />
+                  <figcaption className="mt-2 text-[13px] text-muted-foreground">{img.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        ))}
+
+        <footer className="rounded-xl bg-muted p-5">
+          <p className="font-bold">Terminou? Exporte os dados e guarde no Google Drive.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Leva dez segundos e evita perder o trabalho. <a href="#salvar" className="underline">Ver como</a>.</p>
+          <Link href="/" className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-primary px-5 font-bold text-primary-foreground">Ir para o app</Link>
+        </footer>
 
         <section id="salvar" aria-labelledby="h-salvar" className="scroll-mt-8 space-y-5 rounded-2xl border-2 border-primary bg-card p-6 shadow-sm">
           <div className="flex items-start gap-3">
@@ -72,37 +103,6 @@ export default function TutorialPage() {
             Use o Drive <strong>pessoal</strong>, não o da escola: contas institucionais podem ser fechadas quando você muda de escola. Seus dados não saem do computador a não ser por esse arquivo.
           </p>
         </section>
-
-        {STEPS.map((s, i) => (
-          <section key={s.id} id={s.id} aria-labelledby={`h-${s.id}`} className="scroll-mt-8 space-y-4">
-            <h2 id={`h-${s.id}`} className="flex items-center gap-3 text-2xl leading-8 font-bold">
-              <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-base text-primary-foreground">{i + 1}</span>
-              {s.title}
-            </h2>
-            {s.body.map((p) => <p key={p} className="max-w-3xl text-base leading-7"><Rich text={p} /></p>)}
-            {s.actions && (
-              <ol className="max-w-3xl list-decimal space-y-2 pl-6 text-base leading-7 marker:font-bold marker:text-primary">
-                {s.actions.map((a) => <li key={a}><Rich text={a} /></li>)}
-              </ol>
-            )}
-            {s.tip && <p className="max-w-3xl rounded-lg border-l-4 border-ring bg-accent p-3 text-sm leading-6"><strong>Dica:</strong> {s.tip}</p>}
-            <div className="space-y-4">
-              {s.images.map((img) => (
-                <figure key={img.file}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`${basePath}/tutorial/${img.file}`} alt={img.alt} loading="lazy" className="w-full rounded-xl border border-border bg-card shadow-sm" />
-                  <figcaption className="mt-2 text-[13px] text-muted-foreground">{img.caption}</figcaption>
-                </figure>
-              ))}
-            </div>
-          </section>
-        ))}
-
-        <footer className="rounded-xl bg-muted p-5">
-          <p className="font-bold">Terminou? Exporte os dados e guarde no Google Drive.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Leva dez segundos e evita perder o trabalho. <a href="#salvar" className="underline">Ver como</a>.</p>
-          <Link href="/" className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-primary px-5 font-bold text-primary-foreground">Ir para o app</Link>
-        </footer>
       </main>
     </div>
   );

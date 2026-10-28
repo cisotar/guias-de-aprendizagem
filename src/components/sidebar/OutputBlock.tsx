@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { fromExportFile, toExportFile, toMarkdown } from "@/lib/export/project";
+import { exportFileName, fromExportFile, toExportFile, toMarkdown } from "@/lib/export/project";
 import { columnOrderOf, pickProject, useProject } from "@/store/project";
 import { COLUMN_LABELS } from "@/types";
 import { Block } from "./Block";
@@ -97,7 +97,7 @@ export function OutputBlock({ activeGrade, activeSubject, activeKlass, activeTer
         <Button
           variant="outline" className="h-10 w-full" disabled={state.documents.length === 0}
           onClick={() => {
-            download("cronograma.json", JSON.stringify(toExportFile(pickProject(state)), null, 2), "application/json");
+            download(exportFileName(), JSON.stringify(toExportFile(pickProject(state)), null, 2), "application/json");
             toast.success("Dados exportados");
           }}
         >

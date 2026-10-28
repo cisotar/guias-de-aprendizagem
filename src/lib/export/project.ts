@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { z } from "zod";
 import { fullDate } from "@/lib/dates";
 import { buildSchedule } from "@/lib/schedule/build";
@@ -44,6 +45,9 @@ function scheduleOf(project: Project, doc: PlanDocument) {
   const result = buildSchedule(doc.curriculum, project.teacher, term, doc);
   return result.ok ? result.schedule : null;
 }
+
+/** Nome do arquivo de dados exportado: "2026.10.28-export-guias.json". */
+export const exportFileName = (now = new Date()) => `${format(now, "yyyy.MM.dd")}-export-guias.json`;
 
 export function toExportFile(project: Project, now = new Date()): ExportFile {
   return {

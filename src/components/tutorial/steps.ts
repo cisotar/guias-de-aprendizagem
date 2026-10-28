@@ -81,7 +81,7 @@ export const STEPS: TutorialStep[] = [
 ];
 
 export const SAVE_STEPS = [
-  { title: "Exporte", text: "Na barra lateral, em **Colunas e saída**, clique em **Exportar dados**. O navegador baixa o arquivo **cronograma.json**." },
-  { title: "Envie ao Google Drive", text: "Abra o **drive.google.com** com a sua conta **pessoal**, clique em **Novo › Upload de arquivo** e escolha o cronograma.json." },
+  { title: "Exporte", text: "Na barra lateral, em **Colunas e saída**, clique em **Exportar dados**. O navegador baixa um arquivo com a data de hoje, como **2026.10.28-export-guias.json**." },
+  { title: "Envie ao Google Drive", text: "Abra o **drive.google.com** com a sua conta **pessoal**, clique em **Novo › Upload de arquivo** e escolha o arquivo exportado (**AAAA.MM.DD-export-guias.json**)." },
   { title: "Restaure quando precisar", text: "Em outro computador, navegador ou depois de limpar o histórico, baixe o arquivo do Drive e use **Importar dados**." },
 ];

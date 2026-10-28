@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fromExportFile, toExportFile, toMarkdown } from "./project";
+import { exportFileName, fromExportFile, toExportFile, toMarkdown } from "./project";
 import type { Project } from "@/types";
 
 const lesson = (n: number) => ({
@@ -167,5 +167,12 @@ describe("guias por turma (dados antigos)", () => {
     const old = JSON.parse(JSON.stringify(toExportFile({ ...project, teacher: { ...project.teacher, assignments: [] } }))) as { documents: Record<string, unknown>[] };
     delete old.documents[0].klass;
     expect(fromExportFile(old).documents.map((d) => d.klass)).toEqual([""]);
+  });
+});
+
+describe("exportFileName", () => {
+  it("usa a data de hoje, com zeros à esquerda", () => {
+    expect(exportFileName(new Date(2026, 0, 5))).toBe("2026.01.05-export-guias.json");
+    expect(exportFileName(new Date(2026, 9, 28))).toBe("2026.10.28-export-guias.json");
   });
 });
