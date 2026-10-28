@@ -28,6 +28,13 @@ describe("linhas do cronograma", () => {
     useProject.getState().moveRows(id, "lesson-1", 2, ["lesson-1"]);
     expect(doc().rowOrder).toEqual(["lesson-2", "lesson-3", "lesson-1"]);
   });
+  it("restaurar a posição original devolve a ordem do PDF e mantém as linhas removidas", () => {
+    useProject.getState().moveRows(id, "lesson-1", 2, ["lesson-1"]);
+    useProject.getState().removeRow(id, { weekId: "w1", weekRows: 3, itemId: "lesson-2" });
+    useProject.getState().resetRowOrder(id);
+    expect(normalizeRowOrder(doc().rowOrder, doc().curriculum.lessons, doc().deletedLessons)).toEqual(["lesson-1", "lesson-3"]);
+    expect(doc().deletedLessons).toEqual(["lesson-2"]);
+  });
   it("digitar numa linha vazia cria uma linha livre na posição, sem mudar a contagem do PDF", () => {
     useProject.getState().setRowFields(id, { itemId: null, position: 5 }, { title: "Avaliação" });
     const d = doc();

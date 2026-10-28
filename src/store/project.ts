@@ -25,6 +25,7 @@ import {
 } from "@/types";
 import { mergeFetched } from "@/lib/holidays/normalize";
 import { newBlankId, normalizeRowOrder } from "@/lib/schedule/build";
+import { moveBlock } from "@/lib/schedule/move";
 import { isEmptyLesson } from "@/lib/schedule/lessonText";
 
 export const STORAGE_KEY = "cronograma-geografia";
@@ -81,6 +82,8 @@ type Actions = {
    */
   removeRow: (documentId: string, target: { weekId: string; weekRows: number; itemId: string | null }) => void;
   restoreRows: (documentId: string) => void;
+  /** Devolve as linhas à ordem do PDF (linhas escritas ou clonadas vão para o fim). Não mexe em linhas removidas. */
+  resetRowOrder: (documentId: string) => void;
   /** Grava texto digitado numa linha. Em linha vazia, cria uma linha livre (`custom`) naquela posição. */
   setRowFields: (documentId: string, target: { itemId: string | null; position: number }, patch: Partial<Lesson>) => void;
   toggleColumn: (id: ColumnId) => void;
@@ -264,17 +267,8 @@ export const useProject = create<State>()(
       moveRows: (documentId, activeId, overPosition, ids) =>
         set((s) => updateDocument(s, documentId, (d) => {
           const seq = normalizeRowOrder(d.rowOrder, d.curriculum.lessons, d.deletedLessons);
-          const wanted = new Set(ids.includes(activeId) ? ids : [activeId]);
-          const block = seq.filter((x) => wanted.has(x));
-          const at = block.indexOf(activeId);
-          if (at < 0) return d;
-          const rest = seq.filter((x) => !wanted.has(x));
-          // Solto sobre uma linha que tem conteúdo: o bloco nunca deixa buraco. Solto sobre linhas vazias
-          // (além do fim da sequência): completa com linhas em branco até a posição de destino.
-          let start = Math.max(0, overPosition - at);
-          if (overPosition < seq.length) start = Math.min(start, rest.length);
-          while (rest.length < start) rest.push(newBlankId());
-          rest.splice(start, 0, ...block);
+          const rest = moveBlock(seq, activeId, overPosition, ids, newBlankId);
+          if (!rest) return d;
           return { ...d, rowOrder: rest };
         })),
       cloneRow: (documentId, itemId) =>
@@ -303,6 +297,7 @@ export const useProject = create<State>()(
           };
         })),
       restoreRows: (documentId) => set((s) => updateDocument(s, documentId, (d) => ({ ...d, removedRows: {}, deletedLessons: [] }))),
+      resetRowOrder: (documentId) => set((s) => updateDocument(s, documentId, (d) => ({ ...d, rowOrder: [] }))),
       setRowFields: (documentId, { itemId, position }, patch) =>
         set((s) => updateDocument(s, documentId, (d) => {
           const lessons = d.curriculum.lessons;
