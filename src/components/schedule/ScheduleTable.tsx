@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors,
-  type Announcements, type DragEndEvent, type DragStartEvent,
+  closestCenter, DndContext, DragOverlay, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors,
+  type Announcements, type DragEndEvent, type DragOverEvent, type DragStartEvent,
 } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
 import { Copy, GripVertical, X } from "lucide-react";
 import { shortDate } from "@/lib/dates";
+import { moveBlock } from "@/lib/schedule/move";
 import { fieldToText, type TextField } from "@/lib/schedule/lessonText";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EditableCell } from "./EditableCell";
@@ -76,11 +77,20 @@ type RowActions = {
   onClone: (row: ScheduleRow) => void;
 };
 
-function Row({ row, columns, dragging, display, selected, onToggle, onSave, onRemove, onClone }: { row: ScheduleRow; columns: ColumnId[]; dragging: boolean; display: Display; selected: boolean; onToggle: (row: ScheduleRow) => void } & RowActions) {
+/**
+ * `slot` é a linha fixa da tabela (semana e posição) e dá o id do arrastar; `row` é o que ela mostra agora. Fora do arrasto
+ * são iguais. Durante o arrasto `row` traz a prévia: a aula que ficaria nesse lugar se o bloco fosse solto ali.
+ */
+function Row({ slot, row, columns, ghost, display, selected, onToggle, onSave, onRemove, onClone }: { slot: ScheduleRow; row: ScheduleRow; columns: ColumnId[]; ghost: boolean; display: Display; selected: boolean; onToggle: (row: ScheduleRow) => void } & RowActions) {
   const lesson = row.lesson;
-  // Linhas vazias não se arrastam, mas aceitam que uma aula seja solta nelas.
-  const sortable = useSortable({ id: row.key, disabled: lesson ? false : { draggable: true } });
-  const { setNodeRef, attributes, listeners, isOver, isDragging, setActivatorNodeRef } = sortable;
+  // Linhas vazias não se arrastam, mas aceitam que uma aula seja solta nelas. Usa a linha original para o arrastar não mudar no meio do gesto.
+  const sortable = useSortable({
+    id: slot.key,
+    disabled: slot.lesson ? false : { draggable: true },
+    // A prévia muda a altura das linhas; se o dnd-kit remedisse, o alvo mudaria sob o ponteiro e o movimento ficaria indo e voltando na divisa.
+    resizeObserverConfig: { disabled: true },
+  });
+  const { setNodeRef, attributes, listeners, setActivatorNodeRef } = sortable;
   const firstOfWeek = row.weekSpan !== null;
   const stripe = row.weekIndex % 2 === 1 ? "bg-week-soft" : "bg-card";
   // Linha vazia só sai se a semana tem outra; linha com conteúdo sempre sai (a interface confirma antes).
@@ -89,34 +99,38 @@ function Row({ row, columns, dragging, display, selected, onToggle, onSave, onRe
   return (
     <tr
       ref={setNodeRef}
+      data-item={row.itemId ?? ""}
       className={cn(
         lesson?.highlight === "project" ? "bg-project" : "bg-card",
         selected && "outline-2 -outline-offset-2 outline-week",
         firstOfWeek && "border-t-2 border-t-week",
-        isDragging && "opacity-40",
-        isOver && dragging && !isDragging && "outline-2 -outline-offset-2 outline-week",
+        ghost && "bg-week-soft opacity-50 outline-2 -outline-offset-2 outline-dashed outline-week",
         "h-14 print:h-[9mm] print:break-inside-avoid",
       )}
     >
-      <td className={cn(cellClass, "print:hidden")}>
-        {lesson && (
+      <td className={cn(cellClass, "bg-inherit print:hidden")}>
+        {(lesson || slot.lesson) && (
           <div className="flex items-center">
-            <Checkbox
-              checked={selected}
-              onCheckedChange={() => onToggle(row)}
-              aria-label={`Selecionar linha ${row.position + 1}`}
-              className="mx-1"
-            />
+            {lesson && (
+              <Checkbox
+                checked={selected}
+                onCheckedChange={() => onToggle(row)}
+                aria-label={`Selecionar linha ${row.position + 1}`}
+                className="mx-1"
+              />
+            )}
+          {slot.lesson && (
           <button
             type="button"
             ref={setActivatorNodeRef}
             {...attributes}
             {...listeners}
-            aria-label={lesson.custom ? `Mover linha ${row.position + 1}` : `Mover aula ${lesson.number}`}
+            aria-label={slot.lesson.custom ? `Mover linha ${row.position + 1}` : `Mover aula ${slot.lesson.number}`}
             className="grid size-10 touch-none place-items-center rounded text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring"
           >
             <GripVertical aria-hidden />
           </button>
+          )}
           </div>
         )}
       </td>
@@ -124,14 +138,14 @@ function Row({ row, columns, dragging, display, selected, onToggle, onSave, onRe
         if (id === "schedule") {
           if (!firstOfWeek) return null;
           return (
-            <td key={id} rowSpan={row.weekSpan ?? 1} className={cn(cellClass, stripe, "align-middle font-bold text-week tabular-nums")}>
+            <td key={id} data-week rowSpan={row.weekSpan ?? 1} className={cn(cellClass, stripe, "align-middle font-bold text-week tabular-nums")}>
               {shortDate(row.week.start)} a {shortDate(row.week.end)}
             </td>
           );
         }
         const field = FIELD[id];
         return (
-          <td key={id} className={cellClass}>
+          <td key={id} className={cn(cellClass, "bg-inherit")}>
             <EditableCell
               text={lesson ? fieldToText(lesson, field) : ""}
               label={`${COLUMN_LABELS[id]} da linha ${row.position + 1}`}
@@ -143,7 +157,7 @@ function Row({ row, columns, dragging, display, selected, onToggle, onSave, onRe
           </td>
         );
       })}
-      <td className={cn(cellClass, "print:hidden")}>
+      <td className={cn(cellClass, "bg-inherit print:hidden")}>
         <div className="flex items-center">
         {lesson && (
           <button
@@ -173,6 +187,7 @@ function Row({ row, columns, dragging, display, selected, onToggle, onSave, onRe
 
 export function ScheduleTable({ rows, columns, display, onMove, onSave, onRemove, onClone }: { rows: ScheduleRow[]; columns: ColumnId[]; display: Display; onMove: (activeId: string, overPosition: number, ids: string[]) => void } & RowActions) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   // Só vale a seleção de linhas que ainda têm aula.
   const selected = useMemo(() => new Set(rows.filter((r) => r.lesson && picked.has(r.key)).map((r) => r.key)), [rows, picked]);
@@ -218,19 +233,72 @@ export function ScheduleTable({ rows, columns, display, onMove, onSave, onRemove
   const dragCount = activeId ? groupOf(activeId).length : 0;
 
   function end(e: DragEndEvent) {
-    setActiveId(null);
+    stop();
     const over = e.over ? byKey.get(String(e.over.id)) : undefined;
     if (over && e.active.id !== e.over?.id) onMove(String(e.active.id), over.position, groupOf(String(e.active.id)));
   }
   const activeLesson = activeId ? byKey.get(activeId)?.lesson : null;
 
+  // Prévia: a ordem que sairia se o bloco fosse solto sobre a linha atual. As linhas da tabela não mudam de lugar
+  // (a semana de cada uma é fixa); o que muda é a aula que cada uma mostra, e as do bloco ficam apagadas no destino.
+  const preview = useMemo(() => {
+    if (!activeId || !overId) return null;
+    const seq = rows.flatMap((r) => (r.itemId ? [r.itemId] : []));
+    const over = byKey.get(overId);
+    if (!over) return null;
+    let blanks = 0;
+    const next = moveBlock(seq, activeId, over.position, [...groupOf(activeId)], () => `preview-blank-${blanks++}`);
+    if (!next) return null;
+    const lessonById = new Map(rows.flatMap((r) => (r.itemId ? [[r.itemId, r.lesson] as const] : [])));
+    const moving = new Set(groupOf(activeId));
+    return rows.map((r) => {
+      const id = next[r.position] ?? null;
+      return { row: { ...r, key: id ?? r.key, itemId: id, lesson: id ? (lessonById.get(id) ?? null) : null }, ghost: id !== null && moving.has(id) };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- byKey e groupOf derivam de rows e selected
+  }, [activeId, overId, rows, selected]);
+
+  const stop = () => { setActiveId(null); setOverId(null); };
+
+  // Animação do movimento (FLIP): depois de cada mudança da prévia, a aula que trocou de linha desliza da altura em que
+  // estava até a nova. A célula da semana fica de fora, porque pertence à linha e não à aula.
+  const bodyRef = useRef<HTMLTableSectionElement>(null);
+  const tops = useRef(new Map<string, number>());
+  const wasDragging = useRef(false);
+  useLayoutEffect(() => {
+    const body = bodyRef.current;
+    if (!body) return;
+    const base = body.getBoundingClientRect().top;
+    const now = new Map<string, number>();
+    const dragging = activeId !== null;
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    body.querySelectorAll<HTMLTableRowElement>("tr[data-item]").forEach((tr) => {
+      const id = tr.dataset.item;
+      if (!id) return;
+      const top = tr.getBoundingClientRect().top - base;
+      now.set(id, top);
+      const before = tops.current.get(id);
+      if (calm || !(dragging || wasDragging.current) || before === undefined || Math.abs(before - top) < 1) return;
+      tr.querySelectorAll<HTMLElement>("td:not([data-week])").forEach((td) => {
+        td.style.position = "relative";
+        td.style.zIndex = "1";
+        const run = td.animate([{ transform: `translateY(${before - top}px)` }, { transform: "translateY(0)" }], { duration: 220, easing: "ease-out" });
+        run.onfinish = run.oncancel = () => { td.style.position = ""; td.style.zIndex = ""; };
+      });
+    });
+    tops.current = now;
+    wasDragging.current = dragging;
+  });
+
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      measuring={{ droppable: { strategy: MeasuringStrategy.BeforeDragging } }}
       onDragStart={(e: DragStartEvent) => setActiveId(String(e.active.id))}
+      onDragOver={(e: DragOverEvent) => setOverId(e.over ? String(e.over.id) : null)}
       onDragEnd={end}
-      onDragCancel={() => setActiveId(null)}
+      onDragCancel={stop}
       accessibility={{
         announcements,
         screenReaderInstructions: { draggable: "Para mover a aula, aperte Espaço, use as setas para escolher a posição e aperte Espaço de novo para soltar. Esc cancela." },
@@ -258,9 +326,9 @@ export function ScheduleTable({ rows, columns, display, onMove, onSave, onRemove
               <th className="border border-line p-2 print:hidden"><span className="sr-only">Clonar ou remover linha</span></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody ref={bodyRef}>
             <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-              {rows.map((r) => <Row key={r.key} row={r} columns={visible} dragging={activeId !== null} display={display} selected={selected.has(r.key)} onToggle={toggle} onSave={onSave} onRemove={onRemove} onClone={onClone} />)}
+              {rows.map((r, i) => <Row key={r.key} slot={r} row={preview?.[i].row ?? r} ghost={preview?.[i].ghost ?? false} columns={visible} display={display} selected={selected.has(preview?.[i].row.key ?? r.key)} onToggle={toggle} onSave={onSave} onRemove={onRemove} onClone={onClone} />)}
             </SortableContext>
           </tbody>
         </table>

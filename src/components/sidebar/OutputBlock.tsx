@@ -71,18 +71,22 @@ export function OutputBlock({ activeGrade, activeSubject, activeKlass, activeTer
         </ul>
       </fieldset>
       <fieldset>
-        <legend className="mb-1.5 text-sm font-medium">Descrição das habilidades e das AEs</legend>
-        {([
-          ["skillsInline", "Habilidades: texto em cada célula"],
-          ["skillsLegend", "Habilidades: legenda abaixo da tabela"],
-          ["essentialInline", "AEs: texto em cada célula"],
-          ["essentialLegend", "AEs: legenda abaixo da tabela"],
-        ] as const).map(([key, label]) => (
-          <Label key={key} className="min-h-10 cursor-pointer text-sm">
-            <Checkbox checked={state.display[key]} onCheckedChange={(v) => state.setDisplay({ [key]: v === true })} />
-            {label}
-          </Label>
-        ))}
+        <legend className="mb-1.5 text-[15px] leading-[22px] font-bold">Descrição das habilidades e das AEs</legend>
+        <ul className="space-y-1">
+          {([
+            ["skillsInline", "Habilidades: texto em cada célula"],
+            ["skillsLegend", "Habilidades: legenda abaixo da tabela"],
+            ["essentialInline", "AEs: texto em cada célula"],
+            ["essentialLegend", "AEs: legenda abaixo da tabela"],
+          ] as const).map(([key, label]) => (
+            <li key={key} className="flex items-center gap-1">
+              <Label className="min-h-10 flex-1 cursor-pointer text-sm">
+                <Checkbox checked={state.display[key]} onCheckedChange={(v) => state.setDisplay({ [key]: v === true })} />
+                {label}
+              </Label>
+            </li>
+          ))}
+        </ul>
         <p className="text-[13px] leading-[18px] text-muted-foreground">
           Sem nenhuma marcada, a coluna mostra só a sigla. As legendas só aparecem se a coluna estiver visível.
         </p>

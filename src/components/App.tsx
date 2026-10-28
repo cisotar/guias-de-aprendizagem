@@ -13,7 +13,7 @@ import { TermConflictDialog, type TermConflict } from "@/components/schedule/Ter
 import { CopyGuideDialog } from "@/components/schedule/CopyGuideDialog";
 import { FILTER_ORDER, GuideFilters, ModeToggle, StatusPill, TargetCards, TermStrip, type ViewMode } from "@/components/schedule/GuideNav";
 import { ScheduleTable } from "@/components/schedule/ScheduleTable";
-import { buildSchedule } from "@/lib/schedule/build";
+import { buildSchedule, normalizeRowOrder } from "@/lib/schedule/build";
 import { classLabel, docsOf, filterTargets, guideStatus, guideTargets, sameTarget, type FilterKey, type GuideFilter, type GuideTarget } from "@/lib/schedule/guides";
 import { textToField } from "@/lib/schedule/lessonText";
 import { buildRows } from "@/lib/schedule/rows";
@@ -22,6 +22,16 @@ import { cn } from "@/lib/utils";
 import { useProject } from "@/store/project";
 import { useHydrated } from "@/store/useHydrated";
 import { type Curriculum, type ParsedCurriculum, type PlanDocument } from "@/types";
+
+/** Botões de ação da guia: azul escuro com texto branco (contraste ~10:1); desativado vira cinza legível, não azul apagado. */
+const DARK_BLUE = "bg-blue-900 text-white hover:bg-blue-950 disabled:bg-slate-300 disabled:text-slate-700 disabled:opacity-100";
+
+/** Fora da ordem do PDF: aulas trocadas de lugar, linhas em branco no meio ou linhas escritas/clonadas. */
+function isReordered(doc: PlanDocument) {
+  const current = normalizeRowOrder(doc.rowOrder, doc.curriculum.lessons, doc.deletedLessons);
+  const original = normalizeRowOrder([], doc.curriculum.lessons, doc.deletedLessons);
+  return current.length !== original.length || current.some((id, i) => id !== original[i]);
+}
 
 function DocumentSection({ doc, first, inReport = false }: { doc: PlanDocument; first: boolean; inReport?: boolean }) {
   const teacher = useProject((s) => s.teacher);
@@ -106,6 +116,7 @@ export function App() {
   const storageWarning = useProject((s) => s.storageWarning);
   const addGuide = useProject((s) => s.addGuide);
   const removeDocument = useProject((s) => s.removeDocument);
+  const resetRowOrder = useProject((s) => s.resetRowOrder);
   const editDocument = useProject((s) => s.editDocument);
   const addAssignment = useProject((s) => s.addAssignment);
   const [mode, setModeState] = useState<ViewMode>(readViewMode);
@@ -283,7 +294,7 @@ export function App() {
 
   const viewSwitch = (
     <div role="group" aria-label="Visão" className="flex gap-1 print:hidden">
-      {([["schedule", "Cronograma"], ["report", "Relatório (guia de aprendizagem)"]] as const).map(([v, label]) => (
+      {([["schedule", "Cronograma"], ["report", "Guia de aprendizagem"]] as const).map(([v, label]) => (
         <button
           key={v}
           type="button"
@@ -444,13 +455,26 @@ export function App() {
                         Copiar guia para outra turma…
                       </Button>
                     )}
-                    <Button variant="outline" className="h-10" onClick={() => window.print()}>Imprimir esta guia</Button>
+                    <Button className={cn("h-10", DARK_BLUE)} onClick={() => window.print()}>Imprimir esta guia</Button>
                   </div>
                 </header>
                 <TermStrip target={detail} activeTerm={activeTerm} onTerm={setSelectedTerm} onUpload={() => openSeries(detail.subject, detail.grade)} />
                 {hasDocs(detail, activeTerm) ? (
                   <>
-                    {viewSwitch}
+                    <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
+                      {viewSwitch}
+                      <Button
+                        className={cn("h-10", DARK_BLUE)}
+                        disabled={!docsOf(documents, detail, activeTerm).some(isReordered)}
+                        onClick={() => {
+                          if (window.confirm("Voltar todas as linhas para a ordem original do PDF? As posições que você ajustou serão perdidas.")) {
+                            docsOf(documents, detail, activeTerm).forEach((d) => resetRowOrder(d.id));
+                          }
+                        }}
+                      >
+                        Restaurar posição original
+                      </Button>
+                    </div>
                     {guide(detail, activeTerm)}
                   </>
                 ) : (
