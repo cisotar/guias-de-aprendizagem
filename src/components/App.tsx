@@ -70,7 +70,7 @@ function DocumentSection({ doc, first, inReport = false }: { doc: PlanDocument; 
         <div role="status" className="rounded-lg border border-border bg-card p-4 print:hidden">
           <p>{result.error}</p>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            Informe as aulas por dia de {curriculum.subject} na {curriculum.grade} (em (em &ldquo;O que leciono&rdquo;)ldquo;Minhas matérias(em &ldquo;O que leciono&rdquo;)rdquo;) e as datas do {curriculum.term}º bimestre na barra lateral.
+            Informe as aulas por dia de {curriculum.subject} em {curriculum.grade} (em &ldquo;Minhas matérias&rdquo;) e as datas do {curriculum.term}º bimestre na barra lateral.
           </p>
         </div>
       ) : (
