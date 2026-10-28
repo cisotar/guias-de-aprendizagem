@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ReportView } from "@/components/report/ReportView";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { SeriesPage } from "@/components/subjects/SeriesPage";
-import { SubjectsPage } from "@/components/subjects/SubjectsPage";
+import { SubjectsPage, TutorialCallout } from "@/components/subjects/SubjectsPage";
 import { Legends } from "@/components/schedule/Legends";
 import { ParseReview } from "@/components/schedule/ParseReview";
 import { TermConflictDialog, type TermConflict } from "@/components/schedule/TermConflictDialog";
@@ -418,6 +418,7 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
             <h1 className="text-2xl leading-8 font-bold">Guias de aprendizagem</h1>
             <p className="mt-2 text-muted-foreground">Ainda não há guia. Em &ldquo;Minhas matérias&rdquo;, abra uma série e envie o PDF do guia.</p>
             <Button className="mt-4 h-10" onClick={() => setSection("materias")}>Ir para Minhas matérias</Button>
+            <div className="mt-4 text-left"><TutorialCallout /></div>
           </div>
         ) : (
           <div className="space-y-5">

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import Link from "next/link";
+import { ChevronsLeft, ChevronsRight, CircleHelp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HolidaysBlock } from "./HolidaysBlock";
 import { OutputBlock } from "./OutputBlock";
@@ -50,6 +51,9 @@ export function Sidebar({ activeGrade, activeSubject, activeKlass, activeTerm }:
           inert={!open}
           className="w-full shrink-0 space-y-6 border-r border-border bg-sidebar p-5 lg:h-screen lg:w-80 lg:overflow-y-auto"
         >
+          <Link href="/tutorial/" className="flex min-h-10 items-center gap-2 rounded-lg border border-border px-3 text-sm font-bold text-primary hover:bg-muted">
+            <CircleHelp aria-hidden className="size-4" /> Como usar o app
+          </Link>
           <TeacherBlock />
           <TermsBlock />
           <HolidaysBlock />

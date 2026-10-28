@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import { CircleHelp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -76,6 +78,19 @@ function SubjectCard({ subject, onOpen }: { subject: string; onOpen: (grade: str
   );
 }
 
+/** Convite ao tutorial, mostrado enquanto o professor ainda não tem nenhuma guia. */
+export function TutorialCallout() {
+  return (
+    <Link href="/tutorial/" className="flex items-center gap-3 rounded-xl border border-primary bg-card p-4 hover:bg-muted">
+      <CircleHelp aria-hidden className="size-6 shrink-0 text-primary" />
+      <span>
+        <b className="text-primary underline">Primeira vez aqui? Veja o tutorial.</b>
+        <span className="block text-[13px] leading-[18px] text-muted-foreground">Passo a passo com imagens, e como guardar seus dados no Google Drive.</span>
+      </span>
+    </Link>
+  );
+}
+
 /** Página inicial: as matérias que o professor leciona, com um link para a página de cada série. */
 export function SubjectsPage({ onOpen }: { onOpen: (subject: string, grade: string) => void }) {
   const assignments = useProject((s) => s.teacher.assignments);
@@ -83,6 +98,7 @@ export function SubjectsPage({ onOpen }: { onOpen: (subject: string, grade: stri
   const [name, setName] = useState("");
   const [picked, setPicked] = useState<string[]>(["1ª série"]);
   const [error, setError] = useState<string | null>(null);
+  const hasGuide = useProject((s) => s.documents.length > 0);
   const subjects = [...new Set(assignments.map((a) => a.subject))];
 
   function submit() {
@@ -103,6 +119,7 @@ export function SubjectsPage({ onOpen }: { onOpen: (subject: string, grade: stri
           Cadastre a matéria e marque as séries em que você leciona. Cada série tem a sua página, para turmas, aulas por semana e PDF.
         </p>
       </header>
+      {!hasGuide && <TutorialCallout />}
       {subjects.length > 0 && (
         <ul className="space-y-4" aria-label="Matérias que você leciona">
           {subjects.map((s) => <SubjectCard key={s} subject={s} onOpen={(g) => onOpen(s, g)} />)}

@@ -22,7 +22,7 @@ Regra do projeto: **biblioteca consolidada antes de código próprio**. Esta lis
 | Formulários | `react-hook-form` + `@hookform/resolvers` | Integra com `zod` e com os campos do shadcn/ui | | https://react-hook-form.com |
 | Notificações | `sonner` (via shadcn/ui) | | | https://sonner.emilkowal.ski |
 | Testes unitários | `vitest` + `@testing-library/react` | Rápido, funciona bem com TypeScript | Jest | https://vitest.dev |
-| Teste de impressão e fluxo | `playwright` (opcional; usado só à mão, não é dependência do projeto) | Gera PDF A4 de verdade para conferir quebras e margens | | https://playwright.dev |
+| Teste de impressão e fluxo; prints do tutorial | `playwright` (opcional; usado só à mão, não é dependência do projeto: `npm i --no-save playwright`) | Gera PDF A4 de verdade para conferir quebras e margens; `scripts/tutorial-screenshots.cjs` gera `public/tutorial/*.png` | | https://playwright.dev |
 | Cálculo offline de feriados | `date-holidays` | Cobre feriados nacionais e estaduais do Brasil (conferido: SP traz 9 de Julho). Não cobre municípios | | https://github.com/commenthol/date-holidays |
 | Utilitário de classes CSS | `clsx` + `tailwind-merge` | Padrão do shadcn/ui (`cn`) | O pacote `cn` que o `shadcn init` adicionou foi removido: não é este utilitário | https://github.com/lukeed/clsx |
 | Base dos componentes shadcn | `@base-ui/react`, `class-variance-authority`, `tw-animate-css` | Vêm com o estilo `base-nova` do shadcn/ui | | https://ui.shadcn.com |

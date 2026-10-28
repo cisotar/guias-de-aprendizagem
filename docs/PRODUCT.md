@@ -70,6 +70,13 @@ Professor do Ensino Médio da rede estadual de SP (o guia de exemplo é o de Geo
 - **Impressão em A4**, respeitando margens, usando só as colunas escolhidas, na ordem escolhida.
 - **Exportação** dos dados para o professor não perder o trabalho (formato em `docs/ARCHITECTURE.md`).
 
+### Tutorial (`/tutorial`)
+
+- Página estática, com imagens, que ensina o professor: pegar o **Escopo - Sequência** no Guia do Currículo Priorizado, salvar só essas páginas como PDF (Ctrl + P › Salvar como PDF › páginas personalizadas › pasta Documentos), cadastrar matérias e turmas, enviar o PDF, ajustar o cronograma e imprimir.
+- **Destaque no topo: exportar o JSON e guardar no Google Drive pessoal**, porque os dados só existem no navegador. Também aparece no fim da página.
+- Link "Como usar o app" sempre no alto da barra lateral; o convite na área principal (Minhas matérias e "Guias de aprendizagem") só aparece enquanto não há nenhuma guia.
+- As imagens ficam em `public/tutorial/` (versionadas, para o site publicado sempre ter os prints) e são geradas por `scripts/tutorial-screenshots.cjs` com dados fictícios. A janela de impressão (02) é uma ilustração, pois o Playwright não captura a janela nativa. Refaça os prints quando a interface mudar.
+
 ## Fora de escopo agora
 
 - Usar os feriados no cálculo das semanas.

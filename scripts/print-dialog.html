@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR"><meta charset="utf-8">
+<style>
+  body { margin: 0; background: #d9dee5; font: 15px/1.4 system-ui, sans-serif; color: #1f2933; }
+  .win { display: flex; width: 1000px; height: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px #0004; }
+  .prev { flex: 1; background: #e8eaed; display: grid; place-items: center; }
+  .page { width: 330px; height: 190px; background: #fff; box-shadow: 0 2px 8px #0003; padding: 12px; font-size: 9px; }
+  .page i { display: block; height: 7px; background: #cfd5dc; margin: 5px 0; }
+  .panel { width: 340px; padding: 20px; border-left: 1px solid #dadce0; }
+  h2 { font-size: 20px; margin: 0 0 18px; font-weight: 500; }
+  .row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0 4px; }
+  .sel { border: 1px solid #dadce0; border-radius: 6px; padding: 8px 10px; }
+  .hl { border: 3px solid #b3203f; border-radius: 8px; padding: 4px; margin: 6px -7px; position: relative; }
+  .tag { position: absolute; right: -2px; top: -14px; background: #b3203f; color: #fff; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 1px 9px; }
+  .btns { position: absolute; bottom: 20px; right: 20px; display: flex; gap: 10px; }
+  .btn { padding: 9px 22px; border-radius: 18px; border: 1px solid #dadce0; }
+  .save { background: #1a73e8; color: #fff; border-color: #1a73e8; font-weight: 600; }
+  .win { position: relative; }
+</style>
+<div class="win">
+  <div class="prev"><div class="page"><b>Escopo - Sequência · 1ª série · 4º Bimestre</b><i></i><i></i><i style="width:70%"></i><i></i><i style="width:85%"></i><i></i><i style="width:60%"></i></div></div>
+  <div class="panel">
+    <h2>Imprimir <span style="color:#5f6368;font-size:14px">· 3 páginas</span></h2>
+    <div class="row"><b>Destino</b></div>
+    <div class="hl"><span class="tag">1</span><div class="sel">Salvar como PDF</div></div>
+    <div class="row"><b>Páginas</b></div>
+    <div class="hl"><span class="tag">2</span><div class="sel">Personalizado</div><div class="sel" style="margin-top:6px">7-9</div></div>
+    <div class="row"><b>Layout</b></div><div class="sel">Paisagem</div>
+    <div class="btns"><span class="btn">Cancelar</span><span class="hl save btn" style="margin:0"><span class="tag">3</span>Salvar</span></div>
+  </div>
+</div>
+</html>
