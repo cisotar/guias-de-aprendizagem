@@ -12,7 +12,7 @@ Professor do Ensino Médio da rede estadual de SP (o guia de exemplo é o de Geo
 
 ### Sidebar (esquerda): só o que vale para tudo
 
-1. **Professor**: nome (fica armazenado).
+1. **Professor**: nome e escola (ficam armazenados e entram no JSON exportado). O nome do professor e o da escola preenchem a identificação de todas as guias; se o professor escrever outro valor numa guia, vale o da guia, e apagar o campo na guia volta ao da barra lateral.
 2. **Bimestres**: data de início e de fim de cada bimestre. As datas são **universais**: valem para todas as séries, matérias e turmas (é o calendário da escola).
 3. **Feriados**: o app busca feriados nacionais, estaduais e municipais; o professor também pode cadastrar feriados à mão. **Nesta versão os feriados são apenas recebidos e armazenados; não entram no cálculo.**
 4. **Colunas e saída**: escolher quais colunas aparecem e em qual ordem, imprimir e exportar.
@@ -57,7 +57,7 @@ Professor do Ensino Médio da rede estadual de SP (o guia de exemplo é o de Geo
 - **Turmas**: cada turma tem a sua guia, independente das outras: aulas por dia, ordem das aulas, linhas livres e relatório. O PDF enviado gera uma cópia para cada turma cadastrada; turma cadastrada depois começa sem guia e recebe uma cópia de outra turma. Impressão: sai a guia que está na tela.
 - **Ver por matéria ou série**: dropdowns de matéria, série e turma; mostra os 4 bimestres da guia escolhida (pronta, editada ou falta o PDF) e abre o bimestre clicado. **Ver por bimestre**: as guias do bimestre (filtráveis por matéria, série e turma), agrupadas por matéria, série e turma, com "Ver e imprimir todas".
 - **Copiar guia**: "Copiar guia para outra turma…" leva aulas, ordem, linhas livres e relatório de uma turma para outras turmas da série, nos bimestres marcados. Muda só a identificação (série e turma passam a ser as do destino). Se o destino já tinha guia, avisa que será substituída. Depois cada guia se edita à parte.
-- **Imagens**: dois campos de envio, a faixa do topo (repete em todas as páginas impressas) e a logo da escola. Valem para todas as séries e bimestres.
+- **Imagens**: dois campos de envio, a faixa do topo (repete em todas as páginas impressas) e a logo da escola. Valem para todas as séries e bimestres. Já vêm preenchidos com `public/img/header.*` (faixa) e `public/img/logo.*` (logo), se esses arquivos existirem. O professor pode **Trocar** por outra imagem ou **Remover** (o campo fica vazio, com a opção "Usar a imagem padrão"). Só as imagens enviadas por ele entram no JSON exportado; a padrão não.
 - **Todo texto é editável** (clique ou Enter). Professor, disciplina, série e bimestre/ano já vêm preenchidos do app; as listas vêm com o texto do modelo. Listas: um item por linha, dois espaços criam subitem; links viram clicáveis.
 - **Datas e eventos**: preenchidos à mão (linhas com texto e data livre), sem usar os feriados da sidebar.
 - Linhas como "Feriado" e "Prova Paulista" ficam como linhas normais do cronograma (decisão do dono do projeto).

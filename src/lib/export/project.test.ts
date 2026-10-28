@@ -21,6 +21,7 @@ const project: Project = {
   ],
   teacher: {
     name: "Ana",
+    school: "E. E. Exemplo",
     assignments: [
       { grade: "1ª série", subject: "Geografia", classes: ["A", "B"], classLessons: { B: { 1: 0, 2: 2, 3: 0, 4: 1, 5: 0 } }, lessonsPerDay: { 1: 2, 2: 0, 3: 1, 4: 0, 5: 0 } },
       { grade: "1ª série", subject: "Biologia", classes: [], classLessons: {}, lessonsPerDay: { 1: 0, 2: 1, 3: 0, 4: 0, 5: 0 } },
@@ -50,6 +51,10 @@ describe("export", () => {
     const imported = fromExportFile(old);
     expect(imported.reports).toEqual({});
     expect(imported.reportImages).toEqual({ banner: null, schoolLogo: null });
+  });
+  it("imagem removida pelo professor ('none') exporta e importa; padrão (null) não leva imagem", () => {
+    const p = { ...project, reportImages: { banner: "none" as const, schoolLogo: null } };
+    expect(fromExportFile(JSON.parse(JSON.stringify(toExportFile(p)))).reportImages).toEqual({ banner: "none", schoolLogo: null });
   });
   it("rejeita imagem que não é data URL de imagem", () => {
     const file = JSON.parse(JSON.stringify(toExportFile(project)));

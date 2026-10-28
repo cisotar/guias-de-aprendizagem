@@ -21,7 +21,7 @@ import { curriculumDifferences } from "@/lib/schedule/sameCurriculum";
 import { cn } from "@/lib/utils";
 import { useProject } from "@/store/project";
 import { useHydrated } from "@/store/useHydrated";
-import { type Curriculum, type ParsedCurriculum, type PlanDocument } from "@/types";
+import { type Curriculum, type ParsedCurriculum, type PlanDocument, type ReportImages } from "@/types";
 
 /** Botões de ação da guia: azul escuro com texto branco (contraste ~10:1); desativado vira cinza legível, não azul apagado. */
 const DARK_BLUE = "bg-blue-900 text-white hover:bg-blue-950 disabled:bg-slate-300 disabled:text-slate-700 disabled:opacity-100";
@@ -108,7 +108,7 @@ function readViewMode(): ViewMode {
   }
 }
 
-export function App() {
+export function App({ defaultImages }: { defaultImages: Partial<Record<keyof ReportImages, string | null>> }) {
   const hydrated = useHydrated();
   const documents = useProject((s) => s.documents);
   const teacher = useProject((s) => s.teacher);
@@ -275,7 +275,7 @@ export function App() {
     if (view === "report") {
       return (
         <div key={`${t.subject}|${t.grade}|${t.klass}`} className={cn(!first && "print:break-before-page")}>
-          <ReportView grade={t.grade} subject={t.subject} klass={t.klass} term={term}>
+          <ReportView defaultImages={defaultImages} grade={t.grade} subject={t.subject} klass={t.klass} term={term}>
             {docs.map((d, j) => <DocumentSection key={d.id} doc={d} first={j === 0} inReport />)}
           </ReportView>
         </div>
@@ -291,6 +291,10 @@ export function App() {
       </div>
     );
   };
+
+  // Guia de aprendizagem: página sem margem, para a faixa do topo ir de borda a borda na primeira folha; as margens de
+  // cima, de baixo e dos lados vêm de dentro do conteúdo (ReportView). No cronograma vale a margem de globals.css.
+  const reportPageStyle = view === "report" && section === "guias" ? <style media="print">{"@page { margin: 0; }"}</style> : null;
 
   const viewSwitch = (
     <div role="group" aria-label="Visão" className="flex gap-1 print:hidden">
@@ -385,7 +389,8 @@ export function App() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row print:block">
+    <div className="flex min-h-screen flex-col lg:flex-row print:block print:min-h-0">
+      {reportPageStyle}
       <Sidebar
         activeGrade={section === "guias" ? (detail?.grade ?? null) : null}
         activeSubject={section === "guias" ? (detail?.subject ?? null) : null}

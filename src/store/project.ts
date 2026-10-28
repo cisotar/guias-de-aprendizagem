@@ -54,6 +54,7 @@ type Actions = {
   editDocument: (id: string, curriculum: Curriculum) => void;
   removeDocument: (id: string) => void;
   setTeacherName: (name: string) => void;
+  setTeacherSchool: (school: string) => void;
   /** Passa a lecionar a matéria na série (sem aulas nem turmas ainda). Não repete uma que já existe. */
   addAssignment: (grade: string, subject: string) => void;
   removeAssignment: (grade: string, subject: string) => void;
@@ -95,7 +96,7 @@ type Actions = {
    * da turma de destino. O que o destino já tinha é substituído (quem pede confirmação é a interface).
    */
   copyReport: (from: ReportTarget, to: ReportTarget) => void;
-  setReportImage: (kind: keyof ReportImages, dataUrl: string | null) => void;
+  setReportImage: (kind: keyof ReportImages, value: ReportImages[keyof ReportImages]) => void;
   importProject: (p: Project) => void;
 };
 
@@ -207,6 +208,7 @@ export const useProject = create<State>()(
         })),
       removeDocument: (id) => set((s) => ({ documents: s.documents.filter((d) => d.id !== id) })),
       setTeacherName: (name) => set((s) => ({ teacher: { ...s.teacher, name } })),
+      setTeacherSchool: (school) => set((s) => ({ teacher: { ...s.teacher, school } })),
       addAssignment: (grade, subject) =>
         set((s) =>
           assignmentFor(s.teacher, grade, subject)
@@ -347,7 +349,7 @@ export const useProject = create<State>()(
           void grade;
           return { reports: { ...s.reports, [reportKeyOf(to)]: rest } };
         }),
-      setReportImage: (kind, dataUrl) => set((s) => ({ reportImages: { ...s.reportImages, [kind]: dataUrl } })),
+      setReportImage: (kind, value) => set((s) => ({ reportImages: { ...s.reportImages, [kind]: value } })),
       importProject: (p) => set({ ...p, storageWarning: null }),
     }),
     {

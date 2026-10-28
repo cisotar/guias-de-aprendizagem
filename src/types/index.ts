@@ -81,6 +81,8 @@ export type Assignment = z.output<typeof assignmentSchema>;
 
 export const teacherSchema = z.object({
   name: z.string(),
+  /** Nome da escola; aparece na identificação de todas as guias, até o professor escrever outro por cima numa guia. */
+  school: z.string().optional(),
   assignments: z.array(assignmentSchema).default([]),
 });
 export type Teacher = z.output<typeof teacherSchema>;
@@ -263,12 +265,14 @@ function upgradeLegacyProject(raw: unknown): unknown {
 }
 
 const imageDataUrl = z.string().regex(/^data:image\/(png|jpeg|webp);base64,/, "Imagem inválida");
+/** `null` = sem imagem própria (vale a padrão de public/img, se houver); `"none"` = o professor removeu e deixou vazio. */
+const reportImage = z.union([imageDataUrl, z.literal("none")]).nullable();
 
 /** Imagens do relatório, guardadas como data URL (ficam no navegador, como o resto dos dados). */
 export const reportImagesSchema = z.object({
   /** Faixa que se repete no topo de cada página. */
-  banner: imageDataUrl.nullable(),
-  schoolLogo: imageDataUrl.nullable(),
+  banner: reportImage,
+  schoolLogo: reportImage,
 });
 export type ReportImages = z.infer<typeof reportImagesSchema>;
 export const NO_REPORT_IMAGES: ReportImages = { banner: null, schoolLogo: null };

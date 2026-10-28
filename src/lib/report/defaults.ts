@@ -40,10 +40,11 @@ export const REPORT_DEFAULTS: Record<ReportTextField, string> = {
 };
 
 /** Valores que o app já sabe (PDF, professor, bimestre); aparecem até o professor escrever por cima. */
-export function derivedDefaults(context: { teacherName: string; curriculum: Curriculum | undefined; klass?: string; term: Term | undefined; termNumber: number }) {
-  const { teacherName, curriculum, klass, term, termNumber } = context;
+export function derivedDefaults(context: { teacherName: string; schoolName?: string; curriculum: Curriculum | undefined; klass?: string; term: Term | undefined; termNumber: number }) {
+  const { teacherName, schoolName = "", curriculum, klass, term, termNumber } = context;
   const year = term?.start.slice(0, 4);
   return {
+    school: schoolName,
     teacher: teacherName,
     subject: curriculum?.subject ?? "",
     grade: curriculum ? `${curriculum.grade}${klass ? ` ${klass}` : ""}` : "",
@@ -51,7 +52,12 @@ export function derivedDefaults(context: { teacherName: string; curriculum: Curr
   } satisfies Partial<Record<ReportTextField, string>>;
 }
 
-/** Valor de um campo: o que o professor escreveu, senão o derivado, senão o texto do modelo. */
+/**
+ * Valor de um campo: o que o professor escreveu, senão o derivado, senão o texto do modelo. Campo derivado
+ * apagado na guia (texto vazio) volta a mostrar o derivado (nome do professor e da escola da barra lateral).
+ */
 export function reportValue(report: Report | undefined, field: ReportTextField, derived: Partial<Record<ReportTextField, string>>): string {
-  return report?.[field] ?? derived[field] ?? REPORT_DEFAULTS[field];
+  const own = report?.[field];
+  if (own !== undefined && !(own.trim() === "" && derived[field])) return own;
+  return derived[field] ?? REPORT_DEFAULTS[field];
 }

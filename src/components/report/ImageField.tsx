@@ -14,15 +14,18 @@ import type { ReportImages } from "@/types";
  * a imagem e os botões de trocar e remover (só na tela). Na impressão sai só a imagem, se houver.
  */
 export function ImageField({
-  kind, label, hint, className, imageClassName,
+  kind, fallback, label, hint, className, imageClassName,
 }: {
   kind: keyof ReportImages;
+  /** Imagem padrão (public/img) usada enquanto o professor não enviar outra. */
+  fallback?: string | null;
   label: string;
   hint: string;
   className?: string;
   imageClassName?: string;
 }) {
-  const image = useProject((s) => s.reportImages[kind]);
+  const own = useProject((s) => s.reportImages[kind]);
+  const image = own === "none" ? null : (own ?? fallback ?? null);
   const setImage = useProject((s) => s.setReportImage);
   const input = useRef<HTMLInputElement>(null);
 
@@ -43,13 +46,13 @@ export function ImageField({
       />
       {image ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element -- data URL local; next/image não se aplica */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- imagem local (data URL ou public/img); next/image não se aplica */}
           <img src={image} alt={label} className={cn("block", imageClassName)} />
           <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 print:hidden">
             <Button type="button" variant="outline" size="sm" className="h-8 bg-card" onClick={() => input.current?.click()}>
               <ImagePlus aria-hidden /> Trocar
             </Button>
-            <Button type="button" variant="outline" size="icon" className="size-8 bg-card" aria-label={`Remover ${label}`} onClick={() => setImage(kind, null)}>
+            <Button type="button" variant="outline" size="icon" className="size-8 bg-card" aria-label={`Remover ${label}`} onClick={() => setImage(kind, "none")}>
               <Trash2 aria-hidden />
             </Button>
           </div>
@@ -64,6 +67,11 @@ export function ImageField({
           <span className="font-medium text-foreground">Enviar {label}</span>
           <span>{hint}</span>
         </button>
+      )}
+      {!image && fallback && (
+        <Button type="button" variant="link" size="sm" className="mt-1 h-auto p-0 text-[13px] print:hidden" onClick={() => setImage(kind, null)}>
+          Usar a imagem padrão
+        </Button>
       )}
     </div>
   );

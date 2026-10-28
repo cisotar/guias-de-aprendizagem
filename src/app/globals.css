@@ -172,7 +172,7 @@
 
 @media print {
   html, body { background: #fff; }
-  [data-sonner-toaster] { display: none !important; }
+  [data-sonner-toaster], section[aria-label^="Notifications"] { display: none !important; } /* o contêiner vazio do aviso gerava uma folha em branco no fim */
   thead tr, tr.bg-project, td.bg-week-soft, .bg-report-head, .bg-report-bar {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;

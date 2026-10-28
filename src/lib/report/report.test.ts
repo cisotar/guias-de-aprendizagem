@@ -40,6 +40,13 @@ describe("reportValue", () => {
     expect(reportValue(undefined, "termLabel", derived)).toBe("2º Bimestre/2024");
     expect(reportValue({ teacher: "Beto", events: [] }, "teacher", derived)).toBe("Beto");
   });
+  it("nome da escola vem da barra lateral; campo derivado apagado na guia volta ao derivado", () => {
+    const withSchool = derivedDefaults({ teacherName: "Ana", schoolName: "E. E. Exemplo", curriculum: undefined, term: undefined, termNumber: 1 });
+    expect(reportValue(undefined, "school", withSchool)).toBe("E. E. Exemplo");
+    expect(reportValue({ school: "Outra", events: [] }, "school", withSchool)).toBe("Outra");
+    expect(reportValue({ school: "", teacher: " ", events: [] }, "school", withSchool)).toBe("E. E. Exemplo");
+    expect(reportValue({ school: "", teacher: " ", events: [] }, "teacher", withSchool)).toBe("Ana");
+  });
   it("texto apagado pelo professor continua vazio, não volta ao padrão", () => {
     expect(reportValue({ socioemotional: "", events: [] }, "socioemotional", derived)).toBe("");
     expect(reportValue(undefined, "socioemotional", derived)).toBe(REPORT_DEFAULTS.socioemotional);

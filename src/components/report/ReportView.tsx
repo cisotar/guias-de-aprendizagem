@@ -8,7 +8,7 @@ import { classLabel } from "@/lib/schedule/guides";
 import { derivedDefaults, reportValue } from "@/lib/report/defaults";
 import { cn } from "@/lib/utils";
 import { useProject } from "@/store/project";
-import { reportKey, type ReportEvent, type ReportTextField } from "@/types";
+import { reportKey, type ReportEvent, type ReportImages, type ReportTextField } from "@/types";
 import { ImageField } from "./ImageField";
 import { BulletList, RichText } from "./RichText";
 
@@ -18,19 +18,20 @@ const head = "bg-report-head border-b border-black px-2 py-1.5 text-center font-
 /**
  * Relatório (guia de aprendizagem) de uma série, matéria e turma num bimestre, no modelo do guia da escola. `children` é o cronograma,
  * que entra no lugar da tabela de aulas do modelo. Todo texto é editável; na impressão a faixa do
- * topo se repete em cada página (é o `thead` de uma tabela).
+ * topo só aparece na primeira folha, de borda a borda (ver `reportPageStyle` em App.tsx).
  */
-export function ReportView({ grade, subject, klass, term, children }: { grade: string; subject: string; klass: string; term: number; children: ReactNode }) {
+export function ReportView({ defaultImages, grade, subject, klass, term, children }: { defaultImages: Partial<Record<keyof ReportImages, string | null>>; grade: string; subject: string; klass: string; term: number; children: ReactNode }) {
   const report = useProject((s) => s.reports[reportKey(grade, subject, klass, term)]);
   const teacherName = useProject((s) => s.teacher.name);
+  const schoolName = useProject((s) => s.teacher.school ?? "");
   const termDates = useProject((s) => s.terms.find((t) => t.number === term));
   const curriculum = useProject((s) => s.documents.find((d) => d.curriculum.grade === grade && d.curriculum.subject === subject && d.klass === klass && d.curriculum.term === term)?.curriculum);
   const setReport = useProject((s) => s.setReport);
   const target = useMemo(() => ({ grade, subject, klass, term }), [grade, subject, klass, term]);
 
   const derived = useMemo(
-    () => derivedDefaults({ teacherName, curriculum, klass, term: termDates, termNumber: term }),
-    [teacherName, curriculum, klass, termDates, term],
+    () => derivedDefaults({ teacherName, schoolName, curriculum, klass, term: termDates, termNumber: term }),
+    [teacherName, schoolName, curriculum, klass, termDates, term],
   );
   const value = (f: ReportTextField) => reportValue(report, f, derived);
   const events = report?.events ?? [];
@@ -53,19 +54,18 @@ export function ReportView({ grade, subject, klass, term, children }: { grade: s
         Clique em qualquer texto para editar. Nas listas, escreva um item por linha; dois espaços no começo da linha criam um subitem. Endereços
         da internet viram links.
       </p>
+      <ImageField kind="banner" fallback={defaultImages.banner} label="faixa do cabeçalho" hint="Imagem larga, na proporção do modelo (cerca de 29,6 × 3,1 cm). Aparece só na primeira folha." className="min-h-24" imageClassName="w-full" />
+      {/* Na impressão a página não tem margem (a faixa vai de borda a borda). As margens de cima e de baixo vêm do cabeçalho e do
+          rodapé da tabela, que se repetem em cada folha; as laterais, do preenchimento da célula. */}
       <table className="w-full table-fixed border-collapse">
-        <thead>
-          <tr>
-            <td className="p-0 print:p-0">
-              <ImageField kind="banner" label="faixa do cabeçalho" hint="Imagem larga, na proporção do modelo (cerca de 29,6 × 3,1 cm). Se repete em todas as páginas." className="min-h-24" imageClassName="w-full" />
-            </td>
-          </tr>
+        <thead className="hidden print:table-header-group">
+          <tr><td className="h-[12mm] p-0" /></tr>
         </thead>
         <tbody>
           <tr>
-            <td className="space-y-4 p-0 pt-4 align-top print:pt-3">
+            <td className="space-y-4 p-0 pt-4 align-top print:px-[15mm] print:pt-3">
               <div className="flex items-center gap-4 px-2">
-                <ImageField kind="schoolLogo" label="logo da escola" hint="Imagem quadrada" className="size-24 shrink-0" imageClassName="size-24 object-contain" />
+                <ImageField kind="schoolLogo" fallback={defaultImages.schoolLogo} label="logo da escola" hint="Imagem quadrada" className="size-24 shrink-0" imageClassName="size-24 object-contain" />
                 <h2 className="flex-1 text-center font-bold">GUIA DE APRENDIZAGEM – PEI</h2>
                 <div aria-hidden className="size-24 shrink-0 print:size-[21mm]" />
               </div>
@@ -170,6 +170,9 @@ export function ReportView({ grade, subject, klass, term, children }: { grade: s
             </td>
           </tr>
         </tbody>
+        <tfoot className="hidden print:table-footer-group">
+          <tr><td className="h-[12mm] p-0" /></tr>
+        </tfoot>
       </table>
     </article>
   );
