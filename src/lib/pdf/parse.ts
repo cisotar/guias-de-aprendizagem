@@ -112,7 +112,11 @@ function readRows(page: PageData, pageNumber: number): RawRow[] {
 
   return table.rows.map((row) => {
     const inRow = page.items.filter((i) => i.y >= row.y0 - 1 && i.y <= row.y1 + 1);
-    const cells = table.columns.map(([x0, x1]) => inRow.filter((i) => i.x >= x0 - 1 && i.x < x1));
+    // Cada trecho vai para uma coluna só: a última que começa até 1pt antes dele. Texto colado na borda
+    // (sem margem interna) cairia em duas colunas vizinhas se cada faixa fosse testada por si.
+    const columnOf = (x: number) => table.columns.reduce((found, [x0], c) => (x >= x0 - 1 ? c : found), -1);
+    const cells: TextItem[][] = table.columns.map(() => []);
+    for (const item of inRow) cells[columnOf(item.x)]?.push(item);
     return { cells, project: row.project };
   });
 }
