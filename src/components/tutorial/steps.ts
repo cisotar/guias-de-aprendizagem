@@ -35,8 +35,8 @@ export const STEPS: TutorialStep[] = [
   },
   {
     id: "materias",
-    title: "Cadastre a matéria e as séries",
-    body: ["Na aba **Minhas matérias**, escreva o nome da matéria, marque as séries em que você leciona e clique em **Adicionar matéria**. Cada série ganha uma página própria."],
+    title: "Cadastre a matéria, a etapa e as séries ou anos",
+    body: ["Na aba **Minhas matérias**, escreva o nome da matéria, escolha a etapa (**Ensino Médio** usa séries; **Ensino Fundamental** usa anos, do 6º ao 9º), marque as séries ou anos em que você leciona e clique em **Adicionar matéria**. Cada série ganha uma página própria."],
     images: [{ file: "03-materias.png", alt: "Tela Minhas matérias com a matéria Geografia e cartões para as três séries.", caption: "Cada série tem o seu cartão." }],
   },
   {

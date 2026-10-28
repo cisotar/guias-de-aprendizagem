@@ -117,10 +117,10 @@ function readRows(page: PageData, pageNumber: number): RawRow[] {
   });
 }
 
-/** Lê "1ª série" e "4º Bimestre" do cabeçalho da página; `null` no que a página não diz. */
+/** Lê "1ª série" (ou "7º ano") e "4º Bimestre" do cabeçalho da página; `null` no que a página não diz. */
 function readLabels(page: PageData) {
   const text = page.items.map((i) => i.str).join(" ");
-  const grade = /(\d+\s*ª\s*série)/i.exec(text)?.[1];
+  const grade = /(\d+\s*ª\s*série|\d+\s*º\s*ano\b)/i.exec(text)?.[1];
   const found = Number(/(\d)º\s*Bimestre/i.exec(text)?.[1] ?? 0);
   return { grade: grade ? normalizeGrade(grade) : null, term: found >= 1 && found <= 4 ? found : null };
 }

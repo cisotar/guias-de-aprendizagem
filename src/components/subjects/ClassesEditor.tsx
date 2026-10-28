@@ -60,7 +60,7 @@ export function ClassesEditor({ a }: { a: Assignment }) {
           <DaysRow id={base} name={`${a.subject}, ${a.grade}`} days={a.lessonsPerDay} onChange={(d, n) => setLessons(a.grade, a.subject, d, n)} />
         </>
       ) : (
-        <ul className="space-y-3" aria-label={`Turmas de ${a.subject} na ${a.grade}`}>
+        <ul className="space-y-3" aria-label={`Turmas de ${a.subject} em ${a.grade}`}>
           {a.classes.map((k) => {
             const days = classLessonsPerDay(a, k);
             return (

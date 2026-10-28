@@ -1,15 +1,30 @@
 import type { PlanDocument } from "@/types";
 
+/** Etapa de ensino: Fundamental (anos finais, "7º ano") ou Médio ("1ª série"). */
+export type Stage = "EF" | "EM";
+
+export const STAGES: Record<Stage, { label: string; gradeWord: string; grades: string[] }> = {
+  EF: { label: "Ensino Fundamental", gradeWord: "ano", grades: ["6º ano", "7º ano", "8º ano", "9º ano"] },
+  EM: { label: "Ensino Médio", gradeWord: "série", grades: ["1ª série", "2ª série", "3ª série"] },
+};
+
+/** "7º ano" é do Fundamental; todo o resto ("1ª série") é do Médio. */
+export const stageOf = (grade: string): Stage => (/\bano\b/i.test(grade) ? "EF" : "EM");
+
 /** "1ª série" → 1. Série sem número vai para o fim. */
 const gradeNumber = (grade: string) => Number(/\d+/.exec(grade)?.[0] ?? Infinity);
 
-/** Escreve a série sempre do mesmo jeito ("1ª série"), para que PDFs diferentes caiam na mesma série. */
+/** Escreve a série ou o ano sempre do mesmo jeito ("1ª série", "7º ano"), para que PDFs diferentes caiam na mesma. */
 export function normalizeGrade(text: string): string {
+  const year = /(\d+)\s*[ºo°]?\s*ano\b/i.exec(text)?.[1];
+  if (year) return `${Number(year)}º ano`;
   const n = /(\d+)\s*[ªa°º]?\s*s[ée]rie/i.exec(text)?.[1];
   return n ? `${Number(n)}ª série` : text.trim();
 }
 
-export const compareGrades = (a: string, b: string) => gradeNumber(a) - gradeNumber(b) || a.localeCompare(b, "pt-BR");
+/** Anos do Fundamental antes das séries do Médio; dentro de cada etapa, pelo número. */
+export const compareGrades = (a: string, b: string) =>
+  Number(stageOf(b) === "EF") - Number(stageOf(a) === "EF") || gradeNumber(a) - gradeNumber(b) || a.localeCompare(b, "pt-BR");
 
 /** Séries que têm PDF, em ordem. */
 export const gradesOf = (documents: PlanDocument[]) => [...new Set(documents.map((d) => d.curriculum.grade))].sort(compareGrades);

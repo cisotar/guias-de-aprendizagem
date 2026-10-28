@@ -101,9 +101,9 @@ function ReviewBody({ curricula, isNew, onConfirm, onCancel }: { curricula: Pars
             )}
             <div className="flex flex-wrap gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor={`${id}-grade`}>Série</Label>
+                <Label htmlFor={`${id}-grade`}>Série ou ano</Label>
                 <select id={`${id}-grade`} className={`${fieldClass} sm:w-48`} value={grade} onChange={(e) => setGroup(g, { grade: e.target.value })}>
-                  {grade === "" && <option value="">Escolha a série</option>}
+                  {grade === "" && <option value="">Escolha a série ou o ano</option>}
                   {gradeOptions(grade).map((x) => <option key={x} value={x}>{x}</option>)}
                 </select>
               </div>
@@ -120,7 +120,7 @@ function ReviewBody({ curricula, isNew, onConfirm, onCancel }: { curricula: Pars
             </div>
             <p className="text-[13px] leading-[18px] text-muted-foreground">
               {c.term === null || c.grade === "" ? "O PDF não informa a série ou o bimestre: escolha acima." : "Lidos do PDF. Troque se precisar."}
-              {grade !== "" && !assignmentFor(teacher, grade, subject) && ` ${subject} na ${grade} não está em "Minhas matérias": será adicionada, sem aulas por dia. Preencha depois.`}
+              {grade !== "" && !assignmentFor(teacher, grade, subject) && ` ${subject} em ${grade} não está em "Minhas matérias": será adicionada, sem aulas por dia. Preencha depois.`}
               {missing.length > 0 && ` Atenção: ${missing.length} aula(s) sem conteúdo ou sem habilidade.`}
             </p>
             {c.lessons.map((l, i) => (

@@ -7,13 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { compareGrades } from "@/lib/schedule/grades";
+import { compareGrades, STAGES, stageOf, type Stage } from "@/lib/schedule/grades";
 import { cn } from "@/lib/utils";
 import { useProject } from "@/store/project";
 import { classLessonsPerDay, type Assignment } from "@/types";
 import { lessonsLabel, weekly } from "./ClassesEditor";
-
-export const STANDARD_GRADES = ["1ª série", "2ª série", "3ª série"];
 
 /** Aulas por semana somadas de todas as turmas da série (ou da série inteira, sem turmas). */
 export const weeklyTotal = (a: Assignment) =>
@@ -38,23 +36,33 @@ function SeriesLink({ a, onOpen }: { a: Assignment; onOpen: () => void }) {
   );
 }
 
-function SubjectCard({ subject, onOpen }: { subject: string; onOpen: (grade: string) => void }) {
+/** Selo da etapa (EF ou EM) ao lado do nome da matéria. */
+function StageBadge({ stage }: { stage: Stage }) {
+  return (
+    <abbr title={STAGES[stage].label} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-bold text-secondary-foreground no-underline">
+      {stage}
+    </abbr>
+  );
+}
+
+/** Uma matéria numa etapa: a mesma matéria nas duas etapas vira dois cartões, cada um com o seu selo. */
+function SubjectCard({ subject, stage, onOpen }: { subject: string; stage: Stage; onOpen: (grade: string) => void }) {
   const all = useProject((s) => s.teacher.assignments);
   const add = useProject((s) => s.addAssignment);
   const remove = useProject((s) => s.removeAssignment);
-  const hasPdf = useProject((s) => s.documents.some((d) => d.curriculum.subject === subject));
-  const mine = all.filter((a) => a.subject === subject);
-  const grades = [...new Set([...STANDARD_GRADES, ...mine.map((a) => a.grade)])].sort(compareGrades);
+  const hasPdf = useProject((s) => s.documents.some((d) => d.curriculum.subject === subject && stageOf(d.curriculum.grade) === stage));
+  const mine = all.filter((a) => a.subject === subject && stageOf(a.grade) === stage);
+  const grades = [...new Set([...STAGES[stage].grades, ...mine.map((a) => a.grade)])].sort(compareGrades);
 
   return (
     <li className="space-y-3 rounded-xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-bold break-words">{subject}</h2>
+        <h2 className="flex flex-wrap items-center gap-2 text-lg font-bold break-words">{subject} <StageBadge stage={stage} /></h2>
         <Button
           variant="outline" className="h-10"
           onClick={() => {
             const extra = hasPdf ? " As guias já geradas continuam salvas, mas sem aulas por dia." : "";
-            if (window.confirm(`Deixar de lecionar ${subject}?${extra}`)) mine.forEach((a) => remove(a.grade, a.subject));
+            if (window.confirm(`Deixar de lecionar ${subject} (${STAGES[stage].label})?${extra}`)) mine.forEach((a) => remove(a.grade, a.subject));
           }}
         >
           Remover matéria
@@ -96,16 +104,23 @@ export function SubjectsPage({ onOpen }: { onOpen: (subject: string, grade: stri
   const assignments = useProject((s) => s.teacher.assignments);
   const add = useProject((s) => s.addAssignment);
   const [name, setName] = useState("");
-  const [picked, setPicked] = useState<string[]>(["1ª série"]);
+  const [stage, setStage] = useState<Stage>("EM");
+  const [picked, setPicked] = useState<string[]>([STAGES.EM.grades[0]]);
   const [error, setError] = useState<string | null>(null);
   const hasGuide = useProject((s) => s.documents.length > 0);
-  const subjects = [...new Set(assignments.map((a) => a.subject))];
+  const cards = [...new Map(assignments.map((a) => [`${a.subject}|${stageOf(a.grade)}`, { subject: a.subject, stage: stageOf(a.grade) }])).values()];
+  const { gradeWord } = STAGES[stage];
+
+  function pickStage(next: Stage) {
+    setStage(next);
+    setPicked([STAGES[next].grades[0]]);
+  }
 
   function submit() {
     const subject = name.trim().replace(/\|/g, "");
     if (!subject) return setError("Informe o nome da matéria.");
-    if (subjects.some((s) => s.toLowerCase() === subject.toLowerCase())) return setError(`${subject} já está na lista.`);
-    if (picked.length === 0) return setError("Marque ao menos uma série.");
+    if (cards.some((c) => c.stage === stage && c.subject.toLowerCase() === subject.toLowerCase())) return setError(`${subject} (${stage}) já está na lista.`);
+    if (picked.length === 0) return setError(`Marque ao menos um${gradeWord === "ano" ? " ano" : "a série"}.`);
     picked.forEach((g) => add(g, subject));
     setName("");
     setError(null);
@@ -116,13 +131,13 @@ export function SubjectsPage({ onOpen }: { onOpen: (subject: string, grade: stri
       <header>
         <h1 className="text-2xl leading-8 font-bold">Minhas matérias</h1>
         <p className="text-[13px] leading-[18px] text-muted-foreground">
-          Cadastre a matéria e marque as séries em que você leciona. Cada série tem a sua página, para turmas, aulas por semana e PDF.
+          Cadastre a matéria, escolha a etapa (Ensino Fundamental ou Médio) e marque as séries ou anos em que você leciona. Cada um tem a sua página, para turmas, aulas por semana e PDF.
         </p>
       </header>
       {!hasGuide && <TutorialCallout />}
-      {subjects.length > 0 && (
+      {cards.length > 0 && (
         <ul className="space-y-4" aria-label="Matérias que você leciona">
-          {subjects.map((s) => <SubjectCard key={s} subject={s} onOpen={(g) => onOpen(s, g)} />)}
+          {cards.map((c) => <SubjectCard key={`${c.subject}|${c.stage}`} subject={c.subject} stage={c.stage} onOpen={(g) => onOpen(c.subject, g)} />)}
         </ul>
       )}
       <form
@@ -137,8 +152,17 @@ export function SubjectsPage({ onOpen }: { onOpen: (subject: string, grade: stri
           <Input id="new-subject" className="h-10" value={name} placeholder="Ex.: Geografia" onChange={(e) => setName(e.target.value)} />
         </div>
         <fieldset className="flex flex-wrap items-center gap-x-4">
-          <legend className="mb-1 text-[13px] text-muted-foreground">Séries em que leciono</legend>
-          {STANDARD_GRADES.map((g) => (
+          <legend className="mb-1 text-[13px] text-muted-foreground">Etapa</legend>
+          {(Object.keys(STAGES) as Stage[]).map((k) => (
+            <Label key={k} className="min-h-10 cursor-pointer text-sm">
+              <input type="radio" name="new-subject-stage" className="size-4 accent-primary" checked={stage === k} onChange={() => pickStage(k)} />
+              {STAGES[k].label}
+            </Label>
+          ))}
+        </fieldset>
+        <fieldset className="flex flex-wrap items-center gap-x-4">
+          <legend className="mb-1 text-[13px] text-muted-foreground">{gradeWord === "ano" ? "Anos" : "Séries"} em que leciono</legend>
+          {STAGES[stage].grades.map((g) => (
             <Label key={g} className="min-h-10 cursor-pointer text-sm">
               <Checkbox checked={picked.includes(g)} onCheckedChange={(on) => setPicked(on ? [...picked, g] : picked.filter((x) => x !== g))} />
               {g}

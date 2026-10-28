@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gradesOf, groupsOf, normalizeGrade, sortDocuments, subjectsOf } from "./grades";
+import { compareGrades, gradesOf, groupsOf, normalizeGrade, sortDocuments, stageOf, subjectsOf } from "./grades";
 import type { PlanDocument } from "@/types";
 
 const doc = (id: string, grade: string, term: number, subject = "Geografia"): PlanDocument => ({
@@ -25,5 +25,12 @@ describe("séries", () => {
       { grade: "1ª série", subject: "Biologia" }, { grade: "1ª série", subject: "História" }, { grade: "2ª série", subject: "Biologia" },
     ]);
     expect(subjectsOf(docs)).toEqual(["Biologia", "História"]);
+  });
+  it("entende anos do Fundamental e separa as etapas", () => {
+    expect(normalizeGrade("7º ano")).toBe("7º ano");
+    expect(normalizeGrade("8 o  Ano")).toBe("8º ano");
+    expect(stageOf("7º ano")).toBe("EF");
+    expect(stageOf("1ª série")).toBe("EM");
+    expect(["1ª série", "9º ano", "6º ano", "3ª série"].sort(compareGrades)).toEqual(["6º ano", "9º ano", "1ª série", "3ª série"]);
   });
 });
