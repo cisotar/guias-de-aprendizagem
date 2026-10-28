@@ -7,6 +7,9 @@ export class PdfParseError extends Error {}
 const HEADERS = ["Aula", "Conteúdo", "Objetivos de aprendizagem", "Habilidades", "Aprendizagem Essencial"] as const;
 const near = (a: number, b: number, tol = 1.5) => Math.abs(a - b) <= tol;
 const BULLET = /^[•·●▪-]$/;
+/** Marcador colado ao texto, como em "• Diferenças entre…": alguns PDFs trazem os dois no mesmo trecho. */
+const GLUED_BULLET = /^[•·●▪]\s*/;
+const INLINE_BULLET = /\s[•●▪]\s+/;
 
 type Line = { y: number; x: number; text: string; bullet: boolean };
 
@@ -21,14 +24,12 @@ function toLines(items: TextItem[]): Line[] {
   }
   return lines.map(({ y, parts }) => {
     parts.sort((a, b) => a.x - b.x);
-    const bullet = BULLET.test(parts[0].str.trim());
-    const rest = bullet ? parts.slice(1) : parts;
-    return {
-      y,
-      x: parts[0].x,
-      bullet,
-      text: rest.map((p) => p.str.trim()).join(" ").replace(/\s+/g, " ").trim(),
-    };
+    const first = parts[0].str.trim();
+    const alone = BULLET.test(first);
+    const bullet = alone || GLUED_BULLET.test(first);
+    const rest = alone ? parts.slice(1) : parts;
+    const text = rest.map((p) => p.str.trim()).join(" ").replace(/\s+/g, " ").trim();
+    return { y, x: parts[0].x, bullet, text: alone ? text : text.replace(GLUED_BULLET, "") };
   }).filter((l) => l.text || l.bullet);
 }
 
@@ -46,7 +47,8 @@ function toTopics(lines: Line[]): string[] {
     if (startsNew) topics.push(line.text);
     else topics[topics.length - 1] = `${prev} ${line.text}`;
   }
-  return topics.filter(Boolean);
+  // Marcador no meio da linha (um tópico logo depois do outro, na mesma linha): separa em tópicos.
+  return topics.flatMap((t) => t.split(INLINE_BULLET)).map((t) => t.replace(GLUED_BULLET, "").trim()).filter(Boolean);
 }
 
 function toEssentialLearning(lines: Line[]): Lesson["essentialLearning"] {

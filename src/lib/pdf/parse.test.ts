@@ -94,4 +94,14 @@ describe("parsePages (PDF com várias séries e bimestres)", () => {
     }
     expect(all[0].lessons.map((l) => l.number)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
   });
+
+  it("marcadores colados ao texto viram um tópico cada, sem '•' sobrando no texto", async () => {
+    const all = parsePages(await load("guia-geografia-1e2serie-todos.pdf"));
+    for (const c of all) {
+      for (const l of c.lessons) expect([...l.content, ...l.objectives].some((t) => /[•●▪]/.test(t))).toBe(false);
+    }
+    const [l1] = all[0].lessons;
+    expect(l1.content).toEqual(["Diferenças entre climatologia e meteorologia.", "Conceitos de tempo e clima."]);
+    expect(l1.objectives).toHaveLength(2);
+  });
 });

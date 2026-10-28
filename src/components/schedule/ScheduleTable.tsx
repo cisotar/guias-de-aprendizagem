@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   closestCenter, DndContext, DragOverlay, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors,
   type Announcements, type DragEndEvent, type DragOverEvent, type DragStartEvent,
@@ -18,8 +18,24 @@ import { cn } from "@/lib/utils";
 import { BNCC_SKILLS } from "@/lib/skills/bncc";
 import { COLUMN_HINTS, COLUMN_IDS, COLUMN_LABELS, type ColumnId, type Display, type Lesson } from "@/types";
 
-/** Larguras relativas; viram porcentagem entre as colunas visíveis (table-layout: fixed). */
-const WEIGHT: Record<ColumnId, number> = { schedule: 10, number: 13, content: 15, objectives: 24, skills: 14, essentialLearning: 24, taught: 5, taughtDate: 9 };
+/**
+ * Largura mínima de cada coluna, em px: serve de peso para repartir a tabela (table-layout: fixed) e, somada, de largura
+ * mínima na tela (abaixo disso a tabela rola). Habilidades e Aprendizagem Essencial só ganham largura quando mostram o texto
+ * da descrição em cada célula; só com os códigos (EM13CHS304, AE1) ficam estreitas. Na impressão a tabela encolhe para caber
+ * entre as margens, nunca passa delas.
+ */
+const widthOf = (c: ColumnId, display: Display): number => {
+  switch (c) {
+    case "schedule": return 100;
+    case "number": return 125;
+    case "content": return 150;
+    case "objectives": return 190;
+    case "skills": return display.skillsInline ? 220 : 105;
+    case "essentialLearning": return display.essentialInline ? 240 : 120;
+    case "taught": return 60;
+    case "taughtDate": return 100;
+  }
+};
 
 const Items = ({ items }: { items: ReactNode[] }) =>
   items.length > 1 ? (
@@ -229,7 +245,7 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
     state: { columnOrder: columns, columnVisibility: Object.fromEntries(COLUMN_IDS.map((c) => [c, columns.includes(c)])) },
   });
   const visible = table.getVisibleLeafColumns().map((c) => c.id as ColumnId);
-  const total = visible.reduce((n, c) => n + WEIGHT[c], 0);
+  const total = visible.reduce((n, c) => n + widthOf(c, display), 0);
 
   const sortableIds = rows.map((r) => r.key);
   const byKey = new Map(rows.map((r) => [r.key, r]));
@@ -328,17 +344,17 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
         </div>
       )}
       <div className="overflow-x-auto rounded-lg border border-line bg-card print:overflow-visible print:rounded-none print:border-0">
-        <table className="w-full min-w-[900px] table-fixed border-collapse text-sm leading-5 print:min-w-0 print:text-[9.5pt] print:leading-[12.5pt]">
+        <table style={{ "--table-min": `${total + 192}px` } as CSSProperties} className="w-full min-w-(--table-min) table-fixed border-collapse text-sm leading-5 print:min-w-0 print:text-[9.5pt] print:leading-[12.5pt]">
           <colgroup>
             <col className="w-24 print:hidden" />
-            {visible.map((c) => <col key={c} style={{ width: `${(WEIGHT[c] / total) * 100}%` }} />)}
+            {visible.map((c) => <col key={c} style={{ width: `${(widthOf(c, display) / total) * 100}%` }} />)}
             <col className="w-24 print:hidden" />
           </colgroup>
           <thead className="table-header-group">
             <tr className="bg-primary text-left text-primary-foreground print:bg-primary">
               <th className="border border-line p-2 print:hidden"><span className="sr-only">Selecionar e mover</span></th>
               {visible.map((c) => (
-                <th key={c} scope="col" title={COLUMN_HINTS[c]} className="border border-line p-2 font-bold print:px-1.5 print:py-1">{COLUMN_LABELS[c]}</th>
+                <th key={c} scope="col" title={COLUMN_HINTS[c]} className="border border-line p-2 font-bold break-words print:px-1.5 print:py-1">{COLUMN_LABELS[c]}</th>
               ))}
               <th className="border border-line p-2 print:hidden"><span className="sr-only">Clonar ou remover linha</span></th>
             </tr>
