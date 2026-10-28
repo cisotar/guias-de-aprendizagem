@@ -103,6 +103,12 @@ type Actions = {
   importProject: (p: Project) => void;
 };
 
+/** Ordem de todas as colunas: a salva, ou (dados antigos) as visíveis seguidas das ocultas na ordem padrão. */
+export function columnOrderOf(p: Pick<Project, "columns" | "columnOrder">): ColumnId[] {
+  const base = [...(p.columnOrder ?? p.columns), ...COLUMN_IDS];
+  return base.filter((c, i) => base.indexOf(c) === i);
+}
+
 type State = Project & Actions & { storageWarning: string | null };
 
 export const pickProject = (s: Project): Project => ({
@@ -111,6 +117,7 @@ export const pickProject = (s: Project): Project => ({
   terms: s.terms,
   holidays: s.holidays,
   columns: s.columns,
+  columnOrder: s.columnOrder,
   location: s.location,
   display: s.display,
   reports: s.reports,
@@ -335,14 +342,21 @@ export const useProject = create<State>()(
         })),
       toggleColumn: (id) =>
         set((s) => {
-          if (s.columns.includes(id)) return s.columns.length > 1 ? { columns: s.columns.filter((c) => c !== id) } : s;
-          return { columns: [...s.columns, id] };
+          const order = columnOrderOf(s);
+          const on = new Set(s.columns);
+          if (on.has(id)) {
+            if (on.size <= 1) return s;
+            on.delete(id);
+          } else on.add(id);
+          return { columns: order.filter((c) => on.has(c)), columnOrder: order };
         }),
       moveColumn: (id, direction) =>
         set((s) => {
-          const from = s.columns.indexOf(id);
-          const to = from + direction;
-          return from < 0 || to < 0 || to >= s.columns.length ? s : { columns: arrayMove(s.columns, from, to) };
+          const neighbour = s.columns[s.columns.indexOf(id) + direction];
+          if (!s.columns.includes(id) || neighbour === undefined) return s;
+          const order = columnOrderOf(s);
+          const moved = arrayMove(order, order.indexOf(id), order.indexOf(neighbour));
+          return { columns: moved.filter((c) => s.columns.includes(c)), columnOrder: moved };
         }),
       setReport: (target, patch) =>
         set((s) => {
@@ -359,7 +373,7 @@ export const useProject = create<State>()(
           return { reports: { ...s.reports, [reportKeyOf(to)]: rest } };
         }),
       setReportImage: (kind, value) => set((s) => ({ reportImages: { ...s.reportImages, [kind]: value } })),
-      importProject: (p) => set({ ...p, storageWarning: null }),
+      importProject: (p) => set({ ...p, columnOrder: p.columnOrder, storageWarning: null }),
     }),
     {
       name: STORAGE_KEY,

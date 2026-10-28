@@ -361,6 +361,8 @@ export const projectObjectSchema = z.object({
   terms: z.array(termSchema),
   holidays: z.array(holidaySchema),
   columns: z.array(columnIdSchema),
+  /** Ordem de todas as colunas, visíveis ou não, para uma coluna oculta voltar ao mesmo lugar. Ausente em dados antigos. */
+  columnOrder: z.array(columnIdSchema).optional(),
   location: locationSchema,
   // Dados salvos antes desta opção existir não têm o campo: entram com o padrão.
   display: displaySchema.default(DEFAULT_DISPLAY),

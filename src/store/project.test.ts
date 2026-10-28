@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { emptyProject, useProject } from "./project";
+import { columnOrderOf, emptyProject, useProject } from "./project";
 import { normalizeRowOrder } from "@/lib/schedule/build";
 import { lessonsPerDayFor, type Curriculum, type Lesson } from "@/types";
 
@@ -251,5 +251,18 @@ describe("guias por turma", () => {
     expect(b[0].curriculum.lessons[0].title).toBe("Só da A");
     expect(b[0].id).not.toBe(a.id);
     expect(useProject.getState().reports["1ª série|Geografia|B|1"]).toEqual({ school: "Escola A", events: [] });
+  });
+});
+
+describe("columns", () => {
+  it("keeps a hidden column in its place after moving columns and toggling it back", () => {
+    useProject.setState({ columns: ["schedule", "number", "content", "objectives"], columnOrder: undefined });
+    const { moveColumn, toggleColumn } = useProject.getState();
+    moveColumn("content", -1); // schedule, content, number, objectives
+    toggleColumn("content");
+    expect(columnOrderOf(useProject.getState()).slice(0, 4)).toEqual(["schedule", "content", "number", "objectives"]);
+    expect(useProject.getState().columns).toEqual(["schedule", "number", "objectives"]);
+    toggleColumn("content");
+    expect(useProject.getState().columns).toEqual(["schedule", "content", "number", "objectives"]);
   });
 });

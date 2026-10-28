@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { fromExportFile, toExportFile, toMarkdown } from "@/lib/export/project";
-import { pickProject, useProject } from "@/store/project";
-import { COLUMN_IDS, COLUMN_LABELS, type ColumnId } from "@/types";
+import { columnOrderOf, pickProject, useProject } from "@/store/project";
+import { COLUMN_LABELS } from "@/types";
 import { Block } from "./Block";
 
 function download(name: string, text: string, type: string) {
@@ -23,8 +23,7 @@ function download(name: string, text: string, type: string) {
 export function OutputBlock({ activeGrade, activeSubject, activeKlass, activeTerm }: { activeGrade: string | null; activeSubject: string | null; activeKlass: string | null; activeTerm: number | null }) {
   const state = useProject();
   const file = useRef<HTMLInputElement>(null);
-  const hidden = COLUMN_IDS.filter((c) => !state.columns.includes(c));
-  const list: ColumnId[] = [...state.columns, ...hidden];
+  const list = columnOrderOf(state);
 
   async function importFile(f: File | undefined) {
     if (!f) return;
