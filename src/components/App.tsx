@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ReportView } from "@/components/report/ReportView";
+import { PrintFrame } from "@/components/print/PrintFrame";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { SeriesPage } from "@/components/subjects/SeriesPage";
 import { SubjectsPage, TutorialCallout } from "@/components/subjects/SubjectsPage";
@@ -285,19 +286,21 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
       );
     }
     return (
-      <div key={`${t.subject}|${t.grade}|${t.klass}`} className={cn("space-y-4", !first && "print:break-before-page")}>
-        <header>
-          <h1 className="text-2xl leading-8 font-bold">Cronograma · {t.subject} · {classLabel(t.grade, t.klass)} · {term}º bimestre</h1>
-          {teacher.name && <p className="text-muted-foreground print:text-foreground">Professor(a): {teacher.name}</p>}
-        </header>
-        {docs.map((d, j) => <DocumentSection key={d.id} doc={d} first={j === 0} />)}
-      </div>
+      <PrintFrame key={`${t.subject}|${t.grade}|${t.klass}`} className={cn(!first && "print:break-before-page")}>
+        <div className="space-y-4">
+          <header>
+            <h1 className="text-2xl leading-8 font-bold">Cronograma · {t.subject} · {classLabel(t.grade, t.klass)} · {term}º bimestre</h1>
+            {teacher.name && <p className="text-muted-foreground print:text-foreground">Professor(a): {teacher.name}</p>}
+          </header>
+          {docs.map((d, j) => <DocumentSection key={d.id} doc={d} first={j === 0} />)}
+        </div>
+      </PrintFrame>
     );
   };
 
-  // Guia de aprendizagem: página sem margem, para a faixa do topo ir de borda a borda na primeira folha; as margens de
-  // cima, de baixo e dos lados vêm de dentro do conteúdo (ReportView). No cronograma vale a margem de globals.css.
-  const reportPageStyle = view === "report" && section === "guias" ? <style media="print">{"@page { margin: 0; }"}</style> : null;
+  // Guias: página sem margem. No relatório, para a faixa do topo ir de borda a borda na primeira folha; as margens vêm de
+  // dentro do conteúdo (ReportView no relatório, PrintFrame no cronograma), assim valem até com "Margens: Nenhuma".
+  const reportPageStyle = section === "guias" ? <style media="print">{"@page { margin: 0; }"}</style> : null;
 
   const classesOfTarget = detail ? (teacher.assignments.find((a) => a.grade === detail.grade && a.subject === detail.subject)?.classes ?? []) : [];
 

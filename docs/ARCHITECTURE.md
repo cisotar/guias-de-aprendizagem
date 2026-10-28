@@ -152,7 +152,7 @@ Testes: 30 linhas e 34 aulas (4 extras nas 4 últimas semanas); extras maiores q
 ## Impressão
 
 - Impressão nativa do navegador (`window.print()`), sem biblioteca.
-- `@page { size: A4 landscape; margin: 12mm 15mm; }` (valores iniciais; ver `docs/DESIGN_SYSTEM.md`). A margem do `@page` é aplicada em todas as páginas. As margens que o dono do projeto quer garantidas são as **laterais** (esquerda e direita): a tabela usa `width: 100%` da área útil (267 mm em A4 paisagem com 15 mm de cada lado), com `table-layout: fixed` e quebra de palavras longas, para nada ultrapassar a margem.
+- `@page { size: A4 landscape; margin: 12mm 15mm; }` (valores iniciais; ver `docs/DESIGN_SYSTEM.md`). A margem do `@page` é aplicada em todas as páginas. Nas guias (cronograma e relatório) o `@page` fica com margem 0 e as mesmas margens (12 mm em cima e embaixo, 15 mm nas laterais) são desenhadas no conteúdo (`src/components/print/PrintFrame.tsx` e `ReportView`), para valerem também com "Margens: Nenhuma" na janela de impressão do navegador. As margens que o dono do projeto quer garantidas são as **laterais** (esquerda e direita): a tabela usa `width: 100%` da área útil (267 mm em A4 paisagem com 15 mm de cada lado), com `table-layout: fixed` e quebra de palavras longas, para nada ultrapassar a margem.
 - `thead { display: table-header-group }` para repetir o cabeçalho; `tr { break-inside: avoid }` para não cortar linhas.
 - Sidebar e controles recebem `print:hidden`. A tabela impressa usa as mesmas colunas, na mesma ordem, escolhidas na tela.
 
