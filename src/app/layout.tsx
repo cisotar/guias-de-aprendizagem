@@ -6,7 +6,7 @@ import "./globals.css";
 const font = Atkinson_Hyperlegible({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Cronograma de Geografia",
+  title: "Guias de Aprendizagem",
   description: "Monta o cronograma do bimestre a partir do Guia do Currículo Priorizado.",
 };
 

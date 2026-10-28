@@ -5,7 +5,7 @@ import { Rich } from "@/components/tutorial/Rich";
 import { SAVE_STEPS, STEPS } from "@/components/tutorial/steps";
 
 export const metadata: Metadata = {
-  title: "Como usar · Cronograma de Geografia",
+  title: "Como usar · Guias de Aprendizagem",
   description: "Passo a passo para montar o cronograma e guardar seus dados com segurança.",
 };
 
