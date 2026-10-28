@@ -21,7 +21,7 @@ Professor do Ensino Médio da rede estadual de SP (o guia de exemplo é o de Geo
 
 - **Lista de matérias**: o professor cadastra a matéria (ex.: Matemática) e marca as séries em que leciona (1ª, 2ª, 3ª). Cada matéria mostra **um link por série** ("Matemática · 3ª série") com as turmas, as aulas por semana e quantos bimestres têm PDF. Série em que não leciona aparece tracejada, com "Passar a lecionar".
 - **Página de uma matéria numa série**, em quatro partes:
-  1. **Turmas e aulas por semana**: turmas (A, B, C; sem turmas = horário direto) e, para cada uma, quantas aulas dá de segunda a sexta (0 = não leciona).
+  1. **Turmas e aulas por semana**: turmas escolhidas em pills (A a E, mais um "+" que acrescenta F, G…; clicar liga ou desliga; sem turmas = horário direto) e, para cada uma, quantas aulas dá de segunda a sexta (0 = não leciona).
   2. **PDF do Escopo-Sequência**: enviar o PDF já ligado à matéria e à série (o PDF não diz a matéria). O PDF traz só a tabela de aulas e vale para todas as turmas: cada turma recebe a sua cópia. **Um PDF pode trazer várias séries e bimestres** (ex.: `files/escopo - todos.pdf`): o app separa uma leitura por série e bimestre e salva todas de uma vez; série que o PDF traz e o professor não cadastrou entra na lista, sem aulas por dia (o aviso aparece na conferência). Cada leitura salva pode ser conferida de novo ou removida.
   3. **Guia de aprendizagem**: os quatro bimestres, com o status de cada um (pronta, editada, falta o PDF), as datas do calendário da escola (só leitura) e o botão "Ver guia".
   4. **Copiar a guia entre as turmas** (quando há mais de uma turma).

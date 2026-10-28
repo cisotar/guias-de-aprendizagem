@@ -42,7 +42,7 @@ export const STEPS: TutorialStep[] = [
   {
     id: "turmas",
     title: "Informe suas turmas e as aulas por semana",
-    body: ["Abra uma série. Na parte **Turmas e aulas por semana**, crie as turmas (A, B, C…) e diga quantas aulas você dá em cada dia, de segunda a sexta. É com isso que o app calcula as semanas."],
+    body: ["Abra uma série. Na parte **Turmas e aulas por semana**, marque as turmas (pills A a E; o **+** acrescenta F, G…) e diga quantas aulas você dá em cada dia, de segunda a sexta. É com isso que o app calcula as semanas."],
     images: [{ file: "04-turmas.png", alt: "Página da série com turmas A e B e campos de aulas de segunda a sexta.", caption: "Aulas por dia, turma a turma." }],
   },
   {

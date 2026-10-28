@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { classPills, nextClassLetter, toggleClass } from "@/lib/schedule/classPills";
 import { useProject } from "@/store/project";
 import { classLessonsPerDay, type Assignment, type LessonsPerDay, type Weekday } from "@/types";
 
@@ -43,17 +43,13 @@ export function ClassesEditor({ a }: { a: Assignment }) {
   const setLessons = useProject((s) => s.setLessonsPerDay);
   const setClassLessons = useProject((s) => s.setClassLessonsPerDay);
   const setClasses = useProject((s) => s.setClasses);
-  const [newClass, setNewClass] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const base = `${a.subject}-${a.grade}`.replace(/\W+/g, "-");
+  const pills = classPills(a.classes);
+  const next = nextClassLetter(a.classes);
 
-  function addClass() {
-    const name = newClass.trim().replace(/\|/g, "");
-    if (!name) return setError("Informe o nome da turma.");
-    if (a.classes.includes(name)) return setError(`A turma ${name} já existe.`);
-    setClasses(a.grade, a.subject, [...a.classes, name]);
-    setNewClass("");
-    setError(null);
+  function toggle(k: string) {
+    if (a.classes.includes(k) && !window.confirm(`Remover a turma ${k} (${a.subject}, ${a.grade})? A guia dela (aulas e ordem) será apagada; o relatório continua salvo.`)) return;
+    setClasses(a.grade, a.subject, toggleClass(a.classes, k));
   }
 
   return (
@@ -69,42 +65,34 @@ export function ClassesEditor({ a }: { a: Assignment }) {
             const days = classLessonsPerDay(a, k);
             return (
               <li key={k} className="space-y-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm">
-                    <span className="font-bold">Turma {k}</span>
-                    <span className="text-[13px] text-muted-foreground"> · {lessonsLabel(weekly(days))}</span>
-                  </p>
-                  <Button
-                    variant="outline" size="icon" className="size-10 shrink-0" aria-label={`Remover turma ${k} da ${a.grade}`}
-                    onClick={() => {
-                      if (window.confirm(`Remover a turma ${k} (${a.subject}, ${a.grade})? A guia dela (aulas e ordem) será apagada; o relatório continua salvo.`)) {
-                        setClasses(a.grade, a.subject, a.classes.filter((c) => c !== k));
-                      }
-                    }}
-                  >
-                    <X aria-hidden />
-                  </Button>
-                </div>
+                <p className="text-sm">
+                  <span className="font-bold">Turma {k}</span>
+                  <span className="text-[13px] text-muted-foreground"> · {lessonsLabel(weekly(days))}</span>
+                </p>
                 <DaysRow id={`${base}-${k}`} name={`${a.subject}, ${a.grade} ${k}`} days={days} onChange={(d, n) => setClassLessons(a.grade, a.subject, k, d, n)} />
               </li>
             );
           })}
         </ul>
       )}
-      <form
-        className="flex items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          addClass();
-        }}
-      >
-        <div className="min-w-0 flex-1 space-y-1">
-          <Label htmlFor={`${base}-new`} className="text-xs font-normal text-muted-foreground">{a.classes.length === 0 ? "Separar em turmas" : "Nova turma"}</Label>
-          <Input id={`${base}-new`} className="h-10" value={newClass} placeholder="A" onChange={(e) => setNewClass(e.target.value)} />
+      <div className="space-y-1">
+        <p id={`${base}-pills`} className="text-xs text-muted-foreground">{a.classes.length === 0 ? "Separar em turmas" : "Turmas"}</p>
+        <div role="group" aria-labelledby={`${base}-pills`} className="flex flex-wrap gap-2">
+          {pills.map((k) => {
+            const on = a.classes.includes(k);
+            return (
+              <Button key={k} type="button" variant={on ? "default" : "outline"} className="h-10 min-w-10 rounded-full px-3" aria-pressed={on} aria-label={`Turma ${k}`} onClick={() => toggle(k)}>
+                {k}
+              </Button>
+            );
+          })}
+          {next && (
+            <Button type="button" variant="outline" size="icon" className="size-10 rounded-full" aria-label={`Adicionar turma ${next}`} onClick={() => setClasses(a.grade, a.subject, toggleClass(a.classes, next))}>
+              <Plus aria-hidden />
+            </Button>
+          )}
         </div>
-        <Button type="submit" variant="outline" className="h-10 shrink-0"><Plus aria-hidden /> Turma</Button>
-      </form>
-      {error && <p role="alert" className="text-[13px] leading-[18px] text-destructive">{error}</p>}
+      </div>
     </div>
   );
 }
