@@ -49,7 +49,8 @@ export function Sidebar({ activeGrade, activeSubject, activeKlass, activeTerm }:
           aria-label="Configurações"
           // `inert` tira a barra recolhida da ordem do Tab e dos leitores de tela.
           inert={!open}
-          className="w-full shrink-0 space-y-6 border-r border-border bg-sidebar p-5 lg:h-screen lg:w-80 lg:overflow-y-auto"
+          // `relative` prende as caixas de seleção invisíveis (position: absolute) aqui dentro; sem isso elas vazam e a página inteira rola.
+          className="relative w-full shrink-0 space-y-6 border-r border-border bg-sidebar p-5 lg:h-screen lg:w-80 lg:overflow-y-auto"
         >
           <Link href="/tutorial/" className="flex min-h-10 items-center gap-2 rounded-lg border border-border px-3 text-sm font-bold text-primary hover:bg-muted">
             <CircleHelp aria-hidden className="size-4" /> Como usar o app
