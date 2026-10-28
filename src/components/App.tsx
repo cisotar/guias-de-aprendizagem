@@ -298,9 +298,10 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
     );
   };
 
-  // Guias: página sem margem. No relatório, para a faixa do topo ir de borda a borda na primeira folha; as margens vêm de
-  // dentro do conteúdo (ReportView no relatório, PrintFrame no cronograma), assim valem até com "Margens: Nenhuma".
-  const reportPageStyle = section === "guias" ? <style media="print">{"@page { margin: 0; }"}</style> : null;
+  // Guias: página sem margem em cima e nas laterais. No relatório, para a faixa do topo ir de borda a borda na primeira folha;
+  // essas margens vêm de dentro do conteúdo (ReportView no relatório, PrintFrame no cronograma). Embaixo ficam 12 mm de margem
+  // da página, onde cai a contagem "x de y" (a caixa de margem precisa de margem de página).
+  const reportPageStyle = section === "guias" ? <style media="print">{"@page { margin: 0 0 12mm 0; @bottom-right { padding-right: 15mm; } }"}</style> : null;
 
   const classesOfTarget = detail ? (teacher.assignments.find((a) => a.grade === detail.grade && a.subject === detail.subject)?.classes ?? []) : [];
 

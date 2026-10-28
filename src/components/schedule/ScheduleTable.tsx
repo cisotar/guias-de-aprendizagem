@@ -353,7 +353,7 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
             <col className="w-24 print:hidden" />
           </colgroup>
           <thead className="table-header-group">
-            <tr className="bg-primary text-left text-primary-foreground print:bg-primary">
+            <tr className="bg-table-head text-left text-primary-foreground print:bg-table-head">
               <th className="border border-line p-2 print:hidden"><span className="sr-only">Selecionar e mover</span></th>
               {visible.map((c) => (
                 <th key={c} scope="col" title={COLUMN_HINTS[c]} className="border border-line p-2 font-bold break-words print:px-1.5 print:py-1">{COLUMN_LABELS[c]}</th>

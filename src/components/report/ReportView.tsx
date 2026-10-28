@@ -13,7 +13,7 @@ import { ImageField } from "./ImageField";
 import { BulletList, RichText } from "./RichText";
 
 const box = "border border-black print:break-inside-avoid";
-const head = "bg-report-head border-b border-black px-2 py-1.5 text-center font-bold";
+const head = "bg-report-head border-b border-black px-2 py-1.5 text-center font-bold text-white";
 
 /**
  * Relatório (guia de aprendizagem) de uma série, matéria e turma num bimestre, no modelo do guia da escola. `children` é o cronograma,
@@ -170,9 +170,6 @@ export function ReportView({ defaultImages, grade, subject, klass, term, childre
             </td>
           </tr>
         </tbody>
-        <tfoot className="hidden print:table-footer-group">
-          <tr><td className="h-[12mm] p-0" /></tr>
-        </tfoot>
       </table>
     </article>
   );

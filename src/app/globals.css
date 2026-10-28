@@ -81,7 +81,8 @@
   --week: #1f5f7a;
   --week-soft: #e3eef2;
   --project: #e9d5f5;
-  --report-head: #f8e7bb;
+  --report-head: #00a59d;
+  --table-head: #00a59d;
   --report-bar: #ddd9c3;
 }
 
@@ -136,6 +137,7 @@
   --color-week-soft: var(--week-soft);
   --color-project: var(--project);
   --color-report-head: var(--report-head);
+  --color-table-head: var(--table-head);
   --color-report-bar: var(--report-bar);
 }
 
@@ -168,6 +170,12 @@
 @page {
   size: A4 landscape;
   margin: 12mm 15mm;
+  /* Contagem de páginas "x de y" (só Chrome/Edge; some com "Margens: Nenhuma"). */
+  @bottom-right {
+    content: counter(page) " de " counter(pages);
+    font-size: 9pt;
+    color: #1c2430;
+  }
 }
 
 html { font-size: calc(100% * var(--page-zoom, 1)); }

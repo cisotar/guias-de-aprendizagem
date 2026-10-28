@@ -28,7 +28,8 @@ Definidas como variáveis CSS e expostas no Tailwind (tema do shadcn/ui com este
 | `--week` | `#1F5F7A` | faixa e texto da coluna Cronograma (azul-petróleo) |
 | `--week-soft` | `#E3EEF2` | só na prévia do arrasto (sem uso nas semanas) |
 | `--project` | `#E9D5F5` | sem uso na tabela (aulas de projeto só têm o selo "Projeto") |
-| `--report-head` | `#F8E7BB` | títulos das caixas do relatório (bege do guia da escola) |
+| `--table-head` | `#00A59D` | fundo do cabeçalho da tabela do cronograma (teal) |
+| `--report-head` | `#00A59D` | títulos das caixas do relatório (mesmo teal do cabeçalho da tabela) |
 | `--report-bar` | `#DDD9C3` | barra acima da tabela de datas do relatório |
 | `--focus` | `#1F5F7A` | anel de foco (2 px + 2 px de afastamento) |
 | `--danger` | `#B42318` | erros |
