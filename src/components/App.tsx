@@ -299,22 +299,6 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
   // cima, de baixo e dos lados vêm de dentro do conteúdo (ReportView). No cronograma vale a margem de globals.css.
   const reportPageStyle = view === "report" && section === "guias" ? <style media="print">{"@page { margin: 0; }"}</style> : null;
 
-  const viewSwitch = (
-    <div role="group" aria-label="Visão" className="flex gap-1 print:hidden">
-      {([["schedule", "Cronograma"], ["report", "Guia de aprendizagem"]] as const).map(([v, label]) => (
-        <button
-          key={v}
-          type="button"
-          aria-pressed={view === v}
-          onClick={() => setView(v)}
-          className={cn("lift min-h-10 rounded-lg border px-4 text-sm font-bold", view === v ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted")}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-
   const classesOfTarget = detail ? (teacher.assignments.find((a) => a.grade === detail.grade && a.subject === detail.subject)?.classes ?? []) : [];
 
   /** Visão bimestre: as guias do bimestre que combinam com os dropdowns, para abrir uma ou imprimir todas. */
@@ -327,7 +311,6 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
                     <div className="flex flex-wrap items-center gap-2 print:hidden">
                       <Button variant="outline" className="h-10" onClick={() => setStacked(false)}>Voltar às guias</Button>
                       <Button className="h-10" onClick={() => window.print()}>Imprimir ({stackedTargets.length} {stackedTargets.length === 1 ? "guia" : "guias"})</Button>
-                      {viewSwitch}
                     </div>
                     {stackedTargets.map((t, i) => guide(t, term, i === 0))}
                   </>
@@ -403,16 +386,17 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
       <main id="conteudo" className="min-w-0 flex-1 p-5 lg:p-8 print:p-0">
         {storageWarning && <p role="alert" className="mb-4 rounded-lg border border-destructive p-3 text-sm text-destructive">{storageWarning}</p>}
         <nav aria-label="Seções" className="mb-6 flex flex-wrap gap-1 border-b border-border pb-3 print:hidden">
-          {([["materias", "Minhas matérias"], ["guias", "Guias"]] as const).map(([id, label]) => (
+          {([
+            ["materias", "Minhas matérias", section !== "guias", () => setSection("materias")],
+            ["schedule", "Cronograma", section === "guias" && view === "schedule", () => { setView("schedule"); setSection("guias"); }],
+            ["report", "Guias de aprendizagem", section === "guias" && view === "report", () => { setView("report"); setSection("guias"); }],
+          ] as const).map(([id, label, active, go]) => (
             <button
               key={id}
               type="button"
-              aria-current={(id === "materias" ? section !== "guias" : section === "guias") ? "page" : undefined}
-              onClick={() => setSection(id)}
-              className={cn(
-                "lift min-h-10 rounded-lg border px-5 font-bold",
-                (id === "materias" ? section !== "guias" : section === "guias") ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted",
-              )}
+              aria-current={active ? "page" : undefined}
+              onClick={go}
+              className={cn("lift min-h-10 rounded-lg border px-5 font-bold", active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted")}
             >
               {label}
             </button>
@@ -469,8 +453,7 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
                 <TermStrip target={detail} activeTerm={activeTerm} onTerm={setSelectedTerm} onUpload={() => openSeries(detail.subject, detail.grade)} />
                 {hasDocs(detail, activeTerm) ? (
                   <>
-                    <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
-                      {viewSwitch}
+                    <div className="flex flex-wrap items-center justify-end gap-2 print:hidden">
                       <Button
                         className={cn("h-10", DARK_BLUE)}
                         disabled={!docsOf(documents, detail, activeTerm).some(isReordered)}
