@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Atkinson_Hyperlegible } from "next/font/google";
+import { PageZoom } from "@/components/PageZoom";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Ir para o cronograma
         </a>
         {children}
+        <PageZoom />
         <Toaster />
       </body>
     </html>

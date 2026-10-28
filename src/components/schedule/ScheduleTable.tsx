@@ -119,9 +119,10 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, o
       data-item={row.itemId ?? ""}
       className={cn(
         "bg-card",
-        selected && "outline-2 -outline-offset-2 outline-week",
+        // Seleção e prévia do arrasto pintam só as células da aula: a da semana (rowSpan) pertence à semana e não muda.
+        selected && "[&>td:not([data-week])]:shadow-[inset_0_2px_0_var(--week),inset_0_-2px_0_var(--week)]",
         firstOfWeek && "border-t-2 border-t-week",
-        ghost && "bg-week-soft opacity-50 outline-2 -outline-offset-2 outline-dashed outline-week",
+        ghost && "[&>td:not([data-week])]:bg-week-soft [&>td:not([data-week])]:opacity-50 [&>td:not([data-week])]:shadow-[inset_0_2px_0_var(--week),inset_0_-2px_0_var(--week)]",
         "h-14 print:h-[9mm] print:break-inside-avoid",
       )}
     >
@@ -155,7 +156,7 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, o
         if (id === "schedule") {
           if (!firstOfWeek) return null;
           return (
-            <td key={id} data-week rowSpan={row.weekSpan ?? 1} className={cn(cellClass, "align-middle font-bold text-week tabular-nums")}>
+            <td key={id} data-week rowSpan={row.weekSpan ?? 1} className={cn(cellClass, "bg-card align-middle font-bold text-week tabular-nums")}>
               {shortDate(row.week.start)} a {shortDate(row.week.end)}
             </td>
           );
@@ -172,7 +173,7 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, o
                   className="mx-auto"
                 />
               )}
-              {lesson && id === "taughtDate" && taught && fullDate(taught)}
+              {lesson && id === "taughtDate" && taught && <span className="inline-block">{fullDate(taught)}</span>}
             </td>
           );
         }
@@ -294,7 +295,7 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
   const stop = () => { setActiveId(null); setOverId(null); };
 
   // Animação do movimento (FLIP): depois de cada mudança da prévia, a aula que trocou de linha desliza da altura em que
-  // estava até a nova. A célula da semana fica de fora, porque pertence à linha e não à aula.
+  // estava até a nova. Só o conteúdo das células anima; a célula em si, a semana e os botões pertencem à linha e não à aula.
   const bodyRef = useRef<HTMLTableSectionElement>(null);
   const tops = useRef(new Map<string, number>());
   const wasDragging = useRef(false);
@@ -312,11 +313,12 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
       now.set(id, top);
       const before = tops.current.get(id);
       if (calm || !(dragging || wasDragging.current) || before === undefined || Math.abs(before - top) < 1) return;
-      tr.querySelectorAll<HTMLElement>("td:not([data-week])").forEach((td) => {
-        td.style.position = "relative";
-        td.style.zIndex = "1";
-        const run = td.animate([{ transform: `translateY(${before - top}px)` }, { transform: "translateY(0)" }], { duration: 220, easing: "ease-out" });
-        run.onfinish = run.oncancel = () => { td.style.position = ""; td.style.zIndex = ""; };
+      // Só o conteúdo desliza: a célula (borda, fundo, semana) e os botões de mover/clonar/remover ficam na linha.
+      tr.querySelectorAll<HTMLElement>("td:not([data-week]):not(:first-child):not(:last-child) > *").forEach((el) => {
+        el.style.position = "relative";
+        el.style.zIndex = "1";
+        const run = el.animate([{ transform: `translateY(${before - top}px)` }, { transform: "translateY(0)" }], { duration: 220, easing: "ease-out" });
+        run.onfinish = run.oncancel = () => { el.style.position = ""; el.style.zIndex = ""; };
       });
     });
     tops.current = now;

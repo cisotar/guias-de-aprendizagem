@@ -6,7 +6,8 @@ export type TutorialStep = {
   body: string[];
   /** Lista numerada de ações, quando o passo tem uma sequência. */
   actions?: string[];
-  images: { file: string; alt: string; caption: string }[];
+  /** `compact`: capturas altas e estreitas aparecem como miniatura e abrem ampliadas em um modal. */
+  images: { file: string; alt: string; caption: string; compact?: boolean }[];
   tip?: string;
 };
 
@@ -61,7 +62,7 @@ export const STEPS: TutorialStep[] = [
     id: "calendario",
     title: "Preencha seus dados e os bimestres",
     body: ["Na barra lateral, escreva seu nome e o da escola e informe início e fim de cada bimestre. Os feriados podem ser buscados ali também. Esses dados valem para todas as guias."],
-    images: [{ file: "07-barra-lateral.png", alt: "Barra lateral com os blocos Professor, Bimestres e Feriados.", caption: "Professor, bimestres e feriados." }],
+    images: [{ file: "07-barra-lateral.png", alt: "Barra lateral com os blocos Professor, Bimestres e Feriados.", caption: "Professor, bimestres e feriados.", compact: true }],
   },
   {
     id: "cronograma",
@@ -76,7 +77,7 @@ export const STEPS: TutorialStep[] = [
     id: "colunas",
     title: "Escolha as colunas e imprima",
     body: ["Em **Colunas e saída**, marque o que aparece na tabela e mude a ordem com as setas. Depois clique em **Imprimir** e use papel A4. A visualização de impressão mostra como vai ficar."],
-    images: [{ file: "09-colunas.png", alt: "Bloco Colunas e saída com caixas de seleção e botões de imprimir e exportar.", caption: "Colunas e botões de saída." }],
+    images: [{ file: "09-colunas.png", alt: "Bloco Colunas e saída com caixas de seleção e botões de imprimir e exportar.", caption: "Colunas e botões de saída.", compact: true }],
   },
 ];
 

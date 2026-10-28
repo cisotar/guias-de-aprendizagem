@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, CloudUpload, Download, HardDriveDownload, ShieldAlert, Upload } from "lucide-react";
 import { Rich } from "@/components/tutorial/Rich";
 import { SAVE_STEPS, STEPS } from "@/components/tutorial/steps";
+import { ZoomImage } from "@/components/tutorial/ZoomImage";
 
 export const metadata: Metadata = {
   title: "Como usar · Guias de Aprendizagem",
@@ -15,7 +16,7 @@ export default function TutorialPage() {
   const basePath = process.env.PAGES_BASE_PATH ?? "";
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 lg:grid lg:grid-cols-[14rem_1fr] lg:gap-10">
-      <nav aria-label="Neste tutorial" className="mb-8 lg:sticky lg:top-8 lg:mb-0 lg:self-start">
+      <nav aria-label="Neste tutorial" className="mb-8 rounded-2xl border border-border bg-card p-4 shadow-sm lg:sticky lg:top-8 lg:mb-0 lg:self-start">
         <Link href="/" className="mb-4 inline-flex min-h-10 items-center gap-1.5 font-bold text-primary underline">
           <ArrowLeft aria-hidden className="size-4" /> Voltar ao app
         </Link>
@@ -29,8 +30,8 @@ export default function TutorialPage() {
         </ol>
       </nav>
 
-      <main id="conteudo" className="min-w-0 space-y-12">
-        <header className="space-y-2">
+      <main id="conteudo" className="min-w-0 space-y-6">
+        <header className="space-y-2 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
           <h1 className="text-3xl leading-9 font-bold">Como usar o app</h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
             Em poucos passos você transforma o Escopo - Sequência do guia em um cronograma por semanas, ajusta a ordem das aulas e imprime em A4.
@@ -38,7 +39,7 @@ export default function TutorialPage() {
         </header>
 
         {STEPS.map((s, i) => (
-          <section key={s.id} id={s.id} aria-labelledby={`h-${s.id}`} className="scroll-mt-8 space-y-4">
+          <section key={s.id} id={s.id} aria-labelledby={`h-${s.id}`} className="scroll-mt-8 space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
             <h2 id={`h-${s.id}`} className="flex items-center gap-3 text-2xl leading-8 font-bold">
               <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-base text-primary-foreground">{i + 1}</span>
               {s.title}
@@ -51,7 +52,9 @@ export default function TutorialPage() {
             )}
             {s.tip && <p className="max-w-3xl rounded-lg border-l-4 border-ring bg-accent p-3 text-sm leading-6"><strong>Dica:</strong> {s.tip}</p>}
             <div className="space-y-4">
-              {s.images.map((img) => (
+              {s.images.map((img) => img.compact ? (
+                <ZoomImage key={img.file} src={`${basePath}/tutorial/${img.file}`} alt={img.alt} caption={img.caption} />
+              ) : (
                 <figure key={img.file}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={`${basePath}/tutorial/${img.file}`} alt={img.alt} loading="lazy" className="w-full rounded-xl border border-border bg-card shadow-sm" />
@@ -62,13 +65,13 @@ export default function TutorialPage() {
           </section>
         ))}
 
-        <footer className="rounded-xl bg-muted p-5">
+        <footer className="rounded-2xl border border-border bg-muted p-6 sm:p-8">
           <p className="font-bold">Terminou? Exporte os dados e guarde no Google Drive.</p>
           <p className="mt-1 text-sm text-muted-foreground">Leva dez segundos e evita perder o trabalho. <a href="#salvar" className="underline">Ver como</a>.</p>
           <Link href="/" className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-primary px-5 font-bold text-primary-foreground">Ir para o app</Link>
         </footer>
 
-        <section id="salvar" aria-labelledby="h-salvar" className="scroll-mt-8 space-y-5 rounded-2xl border-2 border-primary bg-card p-6 shadow-sm">
+        <section id="salvar" aria-labelledby="h-salvar" className="scroll-mt-8 space-y-5 rounded-2xl border-2 border-primary bg-card p-6 shadow-sm sm:p-8">
           <div className="flex items-start gap-3">
             <ShieldAlert aria-hidden className="mt-1 size-7 shrink-0 text-primary" />
             <div>
@@ -95,7 +98,7 @@ export default function TutorialPage() {
           </ol>
           <figure>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${basePath}/tutorial/10-exportar-dados.png`} alt="Barra lateral com o botão Exportar dados em destaque." loading="lazy" className="mx-auto max-h-96 rounded-lg border border-border" />
+            <img src={`${basePath}/tutorial/10-exportar-dados.png`} alt="Barra lateral com o botão Exportar dados em destaque." loading="lazy" className="mx-auto max-h-48 rounded-lg border border-border" />
             <figcaption className="mt-2 text-center text-[13px] text-muted-foreground">O botão Exportar dados fica no fim da barra lateral.</figcaption>
           </figure>
           <p className="flex items-start gap-2 text-sm leading-6">

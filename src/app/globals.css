@@ -170,7 +170,10 @@
   margin: 12mm 15mm;
 }
 
+html { font-size: calc(100% * var(--page-zoom, 1)); }
+
 @media print {
+  html { font-size: 100%; } /* o zoom da tela não muda a impressão */
   html, body { background: #fff; }
   [data-sonner-toaster], section[aria-label^="Notifications"] { display: none !important; } /* o contêiner vazio do aviso gerava uma folha em branco no fim */
   thead tr, tr.bg-project, td.bg-week-soft, .bg-report-head, .bg-report-bar {
