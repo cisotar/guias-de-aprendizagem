@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   closestCenter, DndContext, DragOverlay, KeyboardSensor, MeasuringStrategy, PointerSensor, useSensor, useSensors,
   type Announcements, type DragEndEvent, type DragOverEvent, type DragStartEvent,
@@ -99,7 +99,7 @@ type RowActions = {
  * `slot` é a linha fixa da tabela (semana e posição) e dá o id do arrastar; `row` é o que ela mostra agora. Fora do arrasto
  * são iguais. Durante o arrasto `row` traz a prévia: a aula que ficaria nesse lugar se o bloco fosse solto ali.
  */
-function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, onSave, onRemove, onClone, onTaught }: { slot: ScheduleRow; row: ScheduleRow; columns: ColumnId[]; ghost: boolean; display: Display; selected: boolean; taught: string | undefined; onToggle: (row: ScheduleRow) => void } & RowActions) {
+function Row({ slot, row, columns, ghost, display, selected, taught, onPick, onSave, onRemove, onClone, onTaught }: { slot: ScheduleRow; row: ScheduleRow; columns: ColumnId[]; ghost: boolean; display: Display; selected: boolean; taught: string | undefined; onPick: (row: ScheduleRow) => void } & RowActions) {
   const lesson = row.lesson;
   // Linhas vazias não se arrastam, mas aceitam que uma aula seja solta nelas. Usa a linha original para o arrastar não mudar no meio do gesto.
   const sortable = useSortable({
@@ -118,7 +118,7 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, o
       ref={setNodeRef}
       data-item={row.itemId ?? ""}
       className={cn(
-        "bg-card",
+        selected ? "bg-week-soft" : "bg-card",
         // Seleção e prévia do arrasto pintam só as células da aula: a da semana (rowSpan) pertence à semana e não muda.
         selected && "[&>td:not([data-week])]:shadow-[inset_0_2px_0_var(--week),inset_0_-2px_0_var(--week)]",
         firstOfWeek && "border-t-2 border-t-week",
@@ -126,25 +126,22 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, o
         "h-14 print:h-[9mm] print:break-inside-avoid",
       )}
     >
-      <td className={cn(cellClass, "bg-inherit print:hidden")}>
+      <td className={cn(cellClass, "bg-inherit align-middle print:hidden")}>
         {(lesson || slot.lesson) && (
           <div className="flex items-center">
-            {lesson && (
-              <Checkbox
-                checked={selected}
-                onCheckedChange={() => onToggle(row)}
-                aria-label={`Selecionar linha ${row.position + 1}`}
-                className="mx-1"
-              />
-            )}
           {slot.lesson && (
           <button
             type="button"
             ref={setActivatorNodeRef}
             {...attributes}
             {...listeners}
-            aria-label={slot.lesson.custom ? `Mover linha ${row.position + 1}` : `Mover aula ${slot.lesson.number}`}
-            className="grid size-10 touch-none place-items-center rounded text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring"
+            data-handle=""
+            aria-pressed={selected}
+            aria-label={`${slot.lesson.custom ? `Linha ${row.position + 1}` : `Aula ${slot.lesson.number}`}: clique para selecionar, Espaço para mover`}
+            onClick={() => onPick(row)}
+            // Sem isto o Espaço, que solta a linha no teclado, também "clicaria" ao subir a tecla.
+            onKeyUp={(e) => e.key === " " && e.preventDefault()}
+            className={cn("grid size-10 touch-none place-items-center rounded text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring", selected && "bg-week-soft text-foreground")}
           >
             <GripVertical aria-hidden />
           </button>
@@ -191,7 +188,7 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onToggle, o
           </td>
         );
       })}
-      <td className={cn(cellClass, "bg-inherit print:hidden")}>
+      <td className={cn(cellClass, "bg-inherit align-middle print:hidden")}>
         <div className="flex items-center">
         {lesson && (
           <button
@@ -225,14 +222,33 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   // Só vale a seleção de linhas que ainda têm aula.
   const selected = useMemo(() => new Set(rows.filter((r) => r.lesson && picked.has(r.key)).map((r) => r.key)), [rows, picked]);
-  const toggle = (row: ScheduleRow) =>
-    setPicked((prev) => {
-      const next = new Set(prev);
-      if (next.has(row.key)) next.delete(row.key);
-      else next.add(row.key);
-      return next;
-    });
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+  /**
+   * Clique na alça. Linha já selecionada: sai da seleção (no meio do grupo, a seleção toda é limpa para não deixar buraco).
+   * Linha ao lado do grupo: entra nele. Qualquer outra: vira a única selecionada.
+   */
+  const pick = (row: ScheduleRow) => {
+    const at = (key: string) => rows.findIndex((r) => r.key === key);
+    const index = at(row.key);
+    const chosen = [...selected].map(at).sort((x, y) => x - y);
+    const [first, last] = [chosen[0], chosen[chosen.length - 1]];
+    if (chosen.includes(index)) setPicked(index === first || index === last ? new Set(rows.filter((r, i) => chosen.includes(i) && i !== index).map((r) => r.key)) : new Set());
+    else if (chosen.length && (index === first - 1 || index === last + 1)) setPicked(new Set([...selected, row.key]));
+    else setPicked(new Set([row.key]));
+  };
+  // Clique fora de uma alça ou Esc desfaz a seleção.
+  useEffect(() => {
+    if (!selected.size) return;
+    const clear = () => setPicked(new Set());
+    const onPointerDown = (e: PointerEvent) => !(e.target as Element).closest?.("[data-handle]") && clear();
+    const onKeyDown = (e: KeyboardEvent) => e.key === "Escape" && clear();
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [selected.size]);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { keyboardCodes: { start: ["Space"], cancel: ["Escape"], end: ["Space"] }, coordinateGetter: sortableKeyboardCoordinates }));
 
   const defs = useMemo<ColumnDef<ScheduleRow>[]>(
     () => COLUMN_IDS.map((id) => ({ id, header: COLUMN_LABELS[id], cell: () => null })),
@@ -341,14 +357,14 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
     >
       {selected.size > 0 && (
         <div className="mb-2 flex items-center gap-3 text-sm print:hidden" role="status">
-          <span>{selected.size === 1 ? "1 linha selecionada" : `${selected.size} linhas selecionadas`}. Arraste uma delas para mover todas.</span>
+          <span>{selected.size === 1 ? "1 linha selecionada" : `${selected.size} linhas selecionadas`}. Arraste uma delas para mover todas; clique fora ou aperte Esc para desmarcar.</span>
           <button type="button" className="underline" onClick={() => setPicked(new Set())}>Limpar seleção</button>
         </div>
       )}
       <div className="overflow-x-auto rounded-lg border border-line bg-card print:overflow-visible print:rounded-none print:border-0">
-        <table style={{ "--table-min": `${total + 192}px` } as CSSProperties} className="w-full min-w-(--table-min) table-fixed border-collapse text-sm leading-5 print:min-w-0 print:text-[9.5pt] print:leading-[12.5pt]">
+        <table style={{ "--table-min": `${total + 152}px` } as CSSProperties} className="w-full min-w-(--table-min) table-fixed border-collapse text-sm leading-5 print:min-w-0 print:text-[9.5pt] print:leading-[12.5pt]">
           <colgroup>
-            <col className="w-24 print:hidden" />
+            <col className="w-14 print:hidden" />
             {visible.map((c) => <col key={c} style={{ width: `${(widthOf(c, display) / total) * 100}%` }} />)}
             <col className="w-24 print:hidden" />
           </colgroup>
@@ -363,7 +379,7 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
           </thead>
           <tbody ref={bodyRef}>
             <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-              {rows.map((r, i) => <Row key={r.key} slot={r} row={preview?.[i].row ?? r} ghost={preview?.[i].ghost ?? false} columns={visible} display={display} selected={selected.has(preview?.[i].row.key ?? r.key)} taught={taught[preview?.[i].row.itemId ?? r.itemId ?? ""]} onToggle={toggle} onSave={onSave} onRemove={onRemove} onClone={onClone} onTaught={onTaught} />)}
+              {rows.map((r, i) => <Row key={r.key} slot={r} row={preview?.[i].row ?? r} ghost={preview?.[i].ghost ?? false} columns={visible} display={display} selected={selected.has(preview?.[i].row.key ?? r.key)} taught={taught[preview?.[i].row.itemId ?? r.itemId ?? ""]} onPick={pick} onSave={onSave} onRemove={onRemove} onClone={onClone} onTaught={onTaught} />)}
             </SortableContext>
           </tbody>
         </table>
