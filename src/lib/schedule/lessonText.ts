@@ -4,7 +4,8 @@ import type { Lesson } from "@/types";
 
 export type TextField = "title" | "content" | "objectives" | "skills" | "essentialLearning";
 
-export const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
+/** Uma linha por tópico; marcador digitado no começo ("•", "-", "*") é aceito e ignorado. */
+export const lines = (s: string) => s.split("\n").map((l) => l.trim().replace(/^[•●○■*-]\s+/, "")).filter(Boolean);
 
 export function parseEssential(text: string): Lesson["essentialLearning"] {
   return lines(text).map((t) => {
