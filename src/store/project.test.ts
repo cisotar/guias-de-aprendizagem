@@ -274,3 +274,24 @@ describe("columns", () => {
     expect(useProject.getState().columns).toEqual(["schedule", "content", "number", "objectives"]);
   });
 });
+
+describe("desfazer e refazer", () => {
+  it("desfaz e refaz uma edição", () => {
+    const id = setup();
+    useProject.temporal.getState().clear();
+    useProject.getState().setRowFields(id, { itemId: "lesson-1", position: 0 }, textToField("title", "Novo"));
+    expect(doc().curriculum.lessons[0].title).toBe("Novo");
+    useProject.temporal.getState().undo();
+    expect(doc().curriculum.lessons[0].title).toBe("T1");
+    useProject.temporal.getState().redo();
+    expect(doc().curriculum.lessons[0].title).toBe("Novo");
+  });
+
+  it("importar zera o histórico", () => {
+    setup();
+    useProject.getState().setTeacherName("Ana");
+    expect(useProject.temporal.getState().pastStates.length).toBeGreaterThan(0);
+    useProject.getState().importProject({ ...emptyProject });
+    expect(useProject.temporal.getState().pastStates).toHaveLength(0);
+  });
+});

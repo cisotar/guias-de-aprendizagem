@@ -18,6 +18,7 @@ Regra do projeto: **biblioteca consolidada antes de código próprio**. Esta lis
 | Datas | `date-fns` (locale `ptBR`) | Semanas, intervalos e formatação sem inventar cálculo de calendário | `dayjs`, `moment` | https://date-fns.org |
 | Seletor de datas | `Calendar` do shadcn/ui (usa `react-day-picker`) | Já vem no kit, aceita locale | | https://daypicker.dev |
 | Estado global e persistência | `zustand` com middleware `persist` | Pequeno, tipado, persistência em localStorage pronta | Redux Toolkit (excesso para este caso) | https://zustand.docs.pmnd.rs |
+| Desfazer / refazer | `zundo` (middleware `temporal` do zustand) | Histórico de estados pronto para o store, com limite e comparação; 50 passos, só em memória | Histórico próprio (código novo para algo resolvido) | https://github.com/charkour/zundo |
 | Validação | `zod` | Valida PDF lido, JSON importado, API e storage; gera os tipos | Validação manual | https://zod.dev |
 | Formulários | `react-hook-form` + `@hookform/resolvers` | Integra com `zod` e com os campos do shadcn/ui | | https://react-hook-form.com |
 | Notificações | `sonner` (via shadcn/ui) | | | https://sonner.emilkowal.ski |

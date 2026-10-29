@@ -5,7 +5,10 @@ import { useProject } from "./project";
 export function useHydrated() {
   const [done, setDone] = useState(false);
   useEffect(() => {
-    const unsub = useProject.persist.onFinishHydration(() => setDone(true));
+    const unsub = useProject.persist.onFinishHydration(() => {
+      useProject.temporal.getState().clear(); // carregar do navegador não é um passo a desfazer
+      setDone(true);
+    });
     void useProject.persist.rehydrate();
     return unsub;
   }, []);

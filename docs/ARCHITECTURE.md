@@ -133,6 +133,7 @@ Testes: 30 linhas e 34 aulas (4 extras nas 4 últimas semanas); extras maiores q
 ## Estado e persistência (`store/`)
 
 - Zustand com middleware `persist` (localStorage), com `version` e `migrate` para evoluir o formato.
+- Desfazer: `zundo` (`temporal`) guarda até 50 passos dos dados do projeto (`pickProject`), só em memória. Ctrl/Cmd+Z desfaz e Ctrl/Cmd+Shift+Z ou Ctrl+Y refaz (`useUndoShortcut`), exceto dentro de campos de texto, que têm o desfazer do navegador. Hidratar do localStorage e importar JSON zeram o histórico.
 - O que é salvo: `documents` (cada um com `curriculum`, `rowOrder` e `removedRows`), `teacher`, `terms`, `holidays`, `columns`, `display` (visíveis e ordem), `reports` e `reportImages` (relatório), `location` (UF e município para feriados).
 - Dados da versão 1 (um só `curriculum` e `teachingDays`) são convertidos pelo zod na leitura: viram um documento e 1 aula por dia marcado. O mesmo vale para o JSON exportado com `schemaVersion: 1`.
 - Dados de antes das turmas por guia: cada documento sem `klass` vira uma cópia por turma da série e matéria dele, a primeira com o id original (`upgradeClassDocuments`, no localStorage e no JSON importado); sem turmas, `klass` fica vazio.

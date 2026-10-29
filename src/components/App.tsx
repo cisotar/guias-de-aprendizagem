@@ -22,6 +22,7 @@ import { curriculumDifferences } from "@/lib/schedule/sameCurriculum";
 import { cn } from "@/lib/utils";
 import { useProject } from "@/store/project";
 import { useHydrated } from "@/store/useHydrated";
+import { useUndoShortcut } from "@/store/useUndoShortcut";
 import { type Curriculum, type ParsedCurriculum, type PlanDocument, type ReportImages } from "@/types";
 
 /** Botões de ação da guia: azul escuro com texto branco (contraste ~10:1); desativado vira cinza legível, não azul apagado. */
@@ -114,6 +115,7 @@ function readViewMode(): ViewMode {
 
 export function App({ defaultImages }: { defaultImages: Partial<Record<keyof ReportImages, string | null>> }) {
   const hydrated = useHydrated();
+  useUndoShortcut();
   const documents = useProject((s) => s.documents);
   const teacher = useProject((s) => s.teacher);
   const reports = useProject((s) => s.reports);

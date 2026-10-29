@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { shallow } from "zustand/shallow";
+import { temporal } from "zundo";
 import { arrayMove } from "@dnd-kit/sortable";
 import {
   assignmentFor,
@@ -170,8 +172,12 @@ function updateDocument(s: Project, id: string, fn: (d: PlanDocument) => PlanDoc
   return { documents: s.documents.map((d) => (d.id === id ? fn(d) : d)) };
 }
 
+/** Quantos passos o Ctrl+Z guarda (só em memória; recarregar a página zera). */
+export const UNDO_LIMIT = 50;
+
 export const useProject = create<State>()(
   persist(
+    temporal(
     (set) => ({
       ...emptyProject,
       storageWarning: null,
@@ -373,8 +379,15 @@ export const useProject = create<State>()(
           return { reports: { ...s.reports, [reportKeyOf(to)]: rest } };
         }),
       setReportImage: (kind, value) => set((s) => ({ reportImages: { ...s.reportImages, [kind]: value } })),
-      importProject: (p) => set({ ...p, columnOrder: p.columnOrder, storageWarning: null }),
+      importProject: (p) => {
+        set({ ...p, columnOrder: p.columnOrder, storageWarning: null });
+        // Importar troca o projeto inteiro: desfazer não pode voltar ao projeto anterior.
+        useProject.temporal.getState().clear();
+      },
     }),
+    // O histórico guarda só os dados do projeto, sem avisos nem funções.
+    { limit: UNDO_LIMIT, partialize: (s) => pickProject(s), equality: shallow },
+    ),
     {
       name: STORAGE_KEY,
       version: 2,
