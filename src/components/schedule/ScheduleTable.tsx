@@ -176,8 +176,9 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onPick, onS
         }
         const field = FIELD[id];
         return (
-          <td key={id} className={cn(cellClass, "bg-inherit")}>
+          <td key={id} className={cn(cellClass, "relative bg-inherit")}>
             <EditableCell
+              fill
               text={lesson ? fieldToText(lesson, field) : ""}
               label={`${COLUMN_LABELS[id]} da linha ${row.position + 1}`}
               singleLine={field === "title"}

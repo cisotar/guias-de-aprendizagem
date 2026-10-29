@@ -11,13 +11,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
  * Ctrl+Enter ou "Salvar" confirma, Esc ou "Cancelar" descarta. Na impressão só aparece o conteúdo.
  */
 export function EditableCell({
-  text, label, onSave, children, singleLine = false,
+  text, label, onSave, children, singleLine = false, fill = false,
 }: {
   text: string;
   label: string;
   onSave: (text: string) => void;
   children: ReactNode;
   singleLine?: boolean;
+  /** A área de clique cobre a célula da tabela inteira (o `td` pai precisa ser `relative`), não só o texto. */
+  fill?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(text);
@@ -62,9 +64,10 @@ export function EditableCell({
               }}
               className="block w-full resize-y rounded border border-input bg-card p-2 text-sm leading-5 outline-none focus-visible:ring-3 focus-visible:ring-ring"
             />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>
+            {/* Salvar vem primeiro no DOM (Tab vai nele, depois em Cancelar) e aparece à direita. */}
+            <DialogFooter className="flex-col sm:flex-row-reverse sm:justify-start">
               <Button onClick={save}>Salvar</Button>
+              <Button variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -107,9 +110,13 @@ export function EditableCell({
           open();
         }
       }}
-      className={cn("-m-1 min-h-8 cursor-text rounded p-1 hover:bg-muted/60 print:m-0 print:p-0 print:hover:bg-transparent", empty && "print:min-h-0")}
+      className={cn(
+        "min-h-8 cursor-text rounded before:absolute before:inset-0 hover:before:bg-muted/60 print:before:hidden",
+        !fill && "relative",
+        empty && "print:min-h-0",
+      )}
     >
-      {empty ? <span className="text-xs text-muted-foreground print:hidden">Clique para escrever</span> : children}
+      {empty ? <span className="relative text-xs text-muted-foreground print:hidden">Clique para escrever</span> : <div className="relative">{children}</div>}
     </div>
   );
 }
