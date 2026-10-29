@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnOrderOf, emptyProject, useProject } from "./project";
 import { normalizeRowOrder } from "@/lib/schedule/build";
+import { textToField } from "@/lib/schedule/lessonText";
 import { lessonsPerDayFor, type Curriculum, type Lesson } from "@/types";
 
 const lesson = (n: number): Lesson => ({
@@ -61,6 +62,13 @@ describe("linhas do cronograma", () => {
   it("editar o texto de uma aula do PDF altera só essa aula", () => {
     useProject.getState().setRowFields(id, { itemId: "lesson-2", position: 1 }, { content: ["novo"] });
     expect(doc().curriculum.lessons.map((l) => l.content[0])).toEqual(["c1", "novo", "c3"]);
+  });
+  it("editar a Aprendizagem Essencial grava o texto, com a exibição do texto ligada ou não", () => {
+    for (const essentialInline of [true, false]) {
+      useProject.setState((s) => ({ display: { ...s.display, essentialInline } }));
+      useProject.getState().setRowFields(id, { itemId: "lesson-2", position: 1 }, textToField("essentialLearning", `AE6 - texto ${essentialInline}`));
+      expect(doc().curriculum.lessons[1].essentialLearning).toEqual([{ code: "AE6", text: `texto ${essentialInline}` }]);
+    }
   });
   it("remover linha vazia soma na semana e tira a linha em branco da sequência", () => {
     useProject.getState().moveRows(id, "lesson-1", 3, ["lesson-1"]);

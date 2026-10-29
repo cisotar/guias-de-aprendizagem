@@ -72,7 +72,7 @@ function lessonCell(id: Exclude<ColumnId, "schedule" | "taught" | "taughtDate">,
       if (!display.skillsInline) return l.skills.join(", ");
       return <Items items={l.skills.map((c) => <Coded key={c} code={c} text={BNCC_SKILLS[c] ?? "descrição não encontrada"} />)} />;
     case "essentialLearning":
-      if (!display.essentialInline) return l.essentialLearning.map((a) => a.code).join(", ");
+      if (!display.essentialInline) return l.essentialLearning.map((a) => a.code || a.text).join(", ");
       return <Items items={l.essentialLearning.map((a) => <Coded key={a.code} code={a.code} text={a.text} />)} />;
   }
 }
