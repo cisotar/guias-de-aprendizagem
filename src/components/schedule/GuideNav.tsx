@@ -74,8 +74,8 @@ function FilterSelect({ id, label, value, disabled, children, onChange }: { id: 
 }
 
 /**
- * Dropdowns matéria, série e turma, na ordem da visão (na visão bimestre, o de bimestre vem antes). Começam vazios:
- * o primeiro precisa ser escolhido para liberar os outros, e cada um lista só o que existe dentro dos anteriores.
+ * Dropdowns matéria, série e turma, na ordem da visão (na visão bimestre, o de bimestre vem antes). Começam sem seleção
+ * (todas as guias aparecem) e cada um lista só o que existe dentro dos anteriores.
  */
 export function GuideFilters({ mode, targets, filter, term, onFilter }: {
   mode: ViewMode;
@@ -86,31 +86,27 @@ export function GuideFilters({ mode, targets, filter, term, onFilter }: {
 }) {
   const order = FILTER_ORDER[mode];
   const dates = useTermDates();
-  const ready = term ? term.value !== null : true;
-  const first = ready && filter[order[0]] !== undefined;
   return (
     <div role="group" aria-label="Escolher guia" className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-3 print:hidden">
       {term && (
         <FilterSelect id="filtro-bimestre" label="Bimestre" value={term.value === null ? "" : String(term.value)} onChange={(v) => term.onChange(v === "" ? null : Number(v))}>
-          <option value="">Selecione…</option>
+          <option value="">Todos</option>
           {TERMS.map((n) => <option key={n} value={n}>{n}º bimestre · {dates(n)}</option>)}
         </FilterSelect>
       )}
-      {order.map((key, i) => {
+      {order.map((key) => {
         const options = filterOptions(targets, order, key, filter).filter((o) => key !== "klass" || o !== "");
-        const empty = key === "klass" && first && options.length === 0;
-        // O primeiro dropdown da ordem (ou o de bimestre) abre a seleção; os demais esperam por ele.
-        const isFirst = i === 0;
+        const empty = key === "klass" && options.length === 0;
         return (
           <FilterSelect
             key={key}
             id={`filtro-${key}`}
             label={FILTER_LABEL[key]}
             value={filter[key] ?? ""}
-            disabled={isFirst ? !ready : !first || empty}
+            disabled={empty}
             onChange={(v) => onFilter(key, v === "" ? undefined : v)}
           >
-            <option value="">{isFirst ? "Selecione…" : empty ? "Sem turmas" : "Todas"}</option>
+            <option value="">{empty ? "Sem turmas" : "Todas"}</option>
             {options.map((o) => <option key={o} value={o}>{key === "klass" ? `Turma ${o}` : o}</option>)}
           </FilterSelect>
         );

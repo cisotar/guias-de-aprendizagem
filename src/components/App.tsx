@@ -260,7 +260,7 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
   const targets = useMemo(() => guideTargets(teacher, documents), [teacher, documents]);
   const hasDocs = (t: GuideTarget, term?: number) => docsOf(documents, t, term).length > 0;
   const matching = useMemo(() => filterTargets(targets, filter), [targets, filter]);
-  // Nada aparece até o primeiro dropdown ser escolhido (na visão bimestre, o de bimestre).
+  // Os dropdowns começam vazios e todas as guias aparecem; "started" só indica escolha explícita (abre a guia única).
   const started = mode === "term" ? selectedTerm !== null : filter[FILTER_ORDER[mode][0]] !== undefined;
   const detail = (opened && targets.find((t) => sameTarget(t, opened))) || (mode !== "term" && started && matching.length === 1 ? matching[0] : null);
   const detailTerms = detail ? [1, 2, 3, 4].filter((n) => hasDocs(detail, n)) : [];
@@ -481,10 +481,6 @@ export function App({ defaultImages }: { defaultImages: Partial<Record<keyof Rep
                   </p>
                 )}
               </div>
-            ) : !started ? (
-              <p role="status" className="rounded-lg border border-dashed border-border bg-card p-6 text-center text-muted-foreground print:hidden">
-                {mode === "term" ? "Escolha um bimestre para ver as guias." : mode === "grade" ? "Escolha uma série para ver as guias." : "Escolha uma matéria para ver as guias."}
-              </p>
             ) : mode === "term" && selectedTerm !== null ? (
               termList(selectedTerm)
             ) : (
