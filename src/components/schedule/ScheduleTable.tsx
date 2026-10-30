@@ -11,7 +11,6 @@ import { Copy, GripVertical, X } from "lucide-react";
 import { fullDate, shortDate } from "@/lib/dates";
 import { moveBlock } from "@/lib/schedule/move";
 import { fieldToText, type TextField } from "@/lib/schedule/lessonText";
-import { Checkbox } from "@/components/ui/checkbox";
 import { EditableCell } from "./EditableCell";
 import type { ScheduleRow } from "@/lib/schedule/rows";
 import { cn } from "@/lib/utils";
@@ -32,8 +31,7 @@ const widthOf = (c: ColumnId, display: Display): number => {
     case "objectives": return 190;
     case "skills": return display.skillsInline ? 220 : 105;
     case "essentialLearning": return display.essentialInline ? 240 : 120;
-    case "taught": return 60;
-    case "taughtDate": return 100;
+    case "taught": return 100;
   }
 };
 
@@ -57,7 +55,7 @@ const Coded = ({ code, text }: { code: string; text: string }) => (
   </>
 );
 
-function lessonCell(id: Exclude<ColumnId, "schedule" | "taught" | "taughtDate">, l: Lesson, display: Display) {
+function lessonCell(id: Exclude<ColumnId, "schedule" | "taught">, l: Lesson, display: Display) {
   switch (id) {
     case "number":
       return (
@@ -79,7 +77,7 @@ function lessonCell(id: Exclude<ColumnId, "schedule" | "taught" | "taughtDate">,
 
 const cellClass = "border border-line px-2 py-1.5 align-top break-words print:px-1.5 print:py-1";
 
-const FIELD: Record<Exclude<ColumnId, "schedule" | "taught" | "taughtDate">, TextField> = {
+const FIELD: Record<Exclude<ColumnId, "schedule" | "taught">, TextField> = {
   number: "title",
   content: "content",
   objectives: "objectives",
@@ -158,19 +156,23 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onPick, onS
             </td>
           );
         }
-        if (id === "taught" || id === "taughtDate") {
+        if (id === "taught") {
+          // A célula toda é o botão: clique marca com a data de hoje, outro clique desmarca.
+          const name = lesson?.custom ? `linha ${row.position + 1}` : `aula ${lesson?.number}`;
           return (
-            <td key={id} className={cn(cellClass, "bg-inherit text-center align-middle tabular-nums")}>
-              {lesson && id === "taught" && (
-                <Checkbox
-                  checked={taught !== undefined}
-                  onCheckedChange={(v) => onTaught(row, v === true)}
+            <td key={id} className={cn(cellClass, "bg-inherit p-0 text-center align-middle tabular-nums")}>
+              {lesson && (
+                <button
+                  type="button"
+                  aria-pressed={taught !== undefined}
+                  aria-label={taught ? `Aula dada em ${fullDate(taught)}: ${name}. Clique para desmarcar` : `Marcar ${name} como dada`}
                   title={COLUMN_HINTS.taught}
-                  aria-label={`Aula dada: ${lesson.custom ? `linha ${row.position + 1}` : `aula ${lesson.number}`}`}
-                  className="mx-auto"
-                />
+                  onClick={() => onTaught(row, taught === undefined)}
+                  className="block h-full min-h-13 w-full px-1 hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-inset print:min-h-0"
+                >
+                  {taught && fullDate(taught)}
+                </button>
               )}
-              {lesson && id === "taughtDate" && taught && <span className="inline-block">{fullDate(taught)}</span>}
             </td>
           );
         }
@@ -370,7 +372,7 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
             <col className="w-24 print:hidden" />
           </colgroup>
           <thead className="table-header-group">
-            <tr className="bg-table-head text-left text-primary-foreground print:bg-table-head">
+            <tr className="bg-table-head text-left text-black print:bg-table-head">
               <th className="border border-line p-1 print:hidden"><span className="sr-only">Selecionar e mover</span></th>
               {visible.map((c) => (
                 <th key={c} scope="col" title={COLUMN_HINTS[c]} className="border border-line p-2 font-bold break-words print:px-1.5 print:py-1">{COLUMN_LABELS[c]}</th>

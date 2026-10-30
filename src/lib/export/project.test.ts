@@ -73,6 +73,15 @@ describe("export", () => {
   });
 });
 
+describe("coluna removida", () => {
+  it('dados com a antiga coluna "taughtDate" abrem sem ela', async () => {
+    const { projectSchema } = await import("@/types");
+    const p = projectSchema.parse({ ...project, columns: ["number", "taught", "taughtDate"], columnOrder: ["number", "taught", "taughtDate"] });
+    expect(p.columns).toEqual(["number", "taught"]);
+    expect(p.columnOrder).toEqual(["number", "taught"]);
+  });
+});
+
 describe("migração do professor", () => {
   const doc = (grade: string, subject: string, term = 4) => ({ ...project.documents[0], curriculum: { ...project.documents[0].curriculum, grade, subject, term } });
 

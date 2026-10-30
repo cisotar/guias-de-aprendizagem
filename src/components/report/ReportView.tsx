@@ -13,7 +13,7 @@ import { ImageField } from "./ImageField";
 import { BulletList, RichText } from "./RichText";
 
 const box = "border border-black print:break-inside-avoid";
-const head = "bg-report-head border-b border-black px-2 py-1.5 text-center font-bold text-white";
+const head = "bg-report-head border-b border-black px-2 py-1.5 text-center font-bold text-black";
 
 /**
  * Relatório (guia de aprendizagem) de uma série, matéria e turma num bimestre, no modelo do guia da escola. `children` é o cronograma,
@@ -71,7 +71,7 @@ export function ReportView({ defaultImages, grade, subject, klass, term, childre
               </div>
 
               <section aria-label="Identificação" className={box}>
-                <div className="border-b border-black px-2 py-2 text-center font-bold">{field("school", "escola", (t) => <span>{t}</span>, true)}</div>
+                <div className={cn(head, "[&>div]:flex [&>div]:items-center [&>div]:justify-center")}>{field("school", "escola", (t) => <span>{t}</span>, true)}</div>
                 <div className="grid grid-cols-1 border-b border-black sm:grid-cols-[1.4fr_1.2fr_1fr_1fr] print:grid-cols-[1.4fr_1.2fr_1fr_1fr]">
                   {([
                     ["teacher", "Professor(a)"],

@@ -173,10 +173,12 @@ export const COLUMN_IDS = [
   "skills",
   "essentialLearning",
   "taught",
-  "taughtDate",
 ] as const;
 export const columnIdSchema = z.enum(COLUMN_IDS);
 export type ColumnId = z.infer<typeof columnIdSchema>;
+
+/** Lista de colunas de dados salvos antes de uma coluna sair (ex.: "taughtDate"): ids desconhecidos são descartados. */
+const columnListSchema = z.preprocess((v) => (Array.isArray(v) ? v.filter((c) => (COLUMN_IDS as readonly unknown[]).includes(c)) : v), z.array(columnIdSchema));
 
 export const COLUMN_LABELS: Record<ColumnId, string> = {
   schedule: "Cronograma",
@@ -186,11 +188,10 @@ export const COLUMN_LABELS: Record<ColumnId, string> = {
   skills: "Habilidades",
   essentialLearning: "Aprendizagem Essencial",
   taught: "AD",
-  taughtDate: "AD data",
 };
 
 /** Texto que aparece ao passar o mouse sobre o título ou a caixa da coluna. */
-export const COLUMN_HINTS: Partial<Record<ColumnId, string>> = { taught: "Aula dada", taughtDate: "Data em que a aula foi marcada como dada" };
+export const COLUMN_HINTS: Partial<Record<ColumnId, string>> = { taught: "Aula dada: clique para marcar com a data de hoje e de novo para desmarcar" };
 
 export const locationSchema = z.object({
   uf: z.string(),
@@ -360,9 +361,9 @@ export const projectObjectSchema = z.object({
   teacher: teacherSchema,
   terms: z.array(termSchema),
   holidays: z.array(holidaySchema),
-  columns: z.array(columnIdSchema),
+  columns: columnListSchema,
   /** Ordem de todas as colunas, visíveis ou não, para uma coluna oculta voltar ao mesmo lugar. Ausente em dados antigos. */
-  columnOrder: z.array(columnIdSchema).optional(),
+  columnOrder: columnListSchema.optional(),
   location: locationSchema,
   // Dados salvos antes desta opção existir não têm o campo: entram com o padrão.
   display: displaySchema.default(DEFAULT_DISPLAY),
