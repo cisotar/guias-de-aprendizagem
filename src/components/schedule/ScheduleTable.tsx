@@ -120,7 +120,7 @@ function Row({ slot, row, columns, ghost, display, selected, taught, onPick, onS
       className={cn(
         selected ? "bg-week-soft" : "bg-card",
         // Seleção e prévia do arrasto pintam só as células da aula: a da semana (rowSpan) pertence à semana e não muda.
-        selected && "[&>td:not([data-week])]:shadow-[inset_0_2px_0_var(--week),inset_0_-2px_0_var(--week)]",
+        selected && "[&>td:not([data-week])]:bg-week-soft [&>td:not([data-week])]:shadow-[inset_0_2px_0_var(--week),inset_0_-2px_0_var(--week)]",
         firstOfWeek && "border-t-2 border-t-week",
         ghost && "[&>td:not([data-week])]:bg-week-soft [&>td:not([data-week])]:opacity-50 [&>td:not([data-week])]:shadow-[inset_0_2px_0_var(--week),inset_0_-2px_0_var(--week)]",
         "h-14 print:h-[9mm] print:break-inside-avoid",
@@ -371,7 +371,7 @@ export function ScheduleTable({ rows, columns, display, taught, onMove, onSave, 
           </colgroup>
           <thead className="table-header-group">
             <tr className="bg-table-head text-left text-primary-foreground print:bg-table-head">
-              <th className="border border-line p-2 print:hidden"><span className="sr-only">Selecionar e mover</span></th>
+              <th className="border border-line p-1 print:hidden"><span className="sr-only">Selecionar e mover</span></th>
               {visible.map((c) => (
                 <th key={c} scope="col" title={COLUMN_HINTS[c]} className="border border-line p-2 font-bold break-words print:px-1.5 print:py-1">{COLUMN_LABELS[c]}</th>
               ))}
